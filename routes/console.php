@@ -1,0 +1,14 @@
+<?php
+
+use Illuminate\Foundation\Inspiring;
+use Illuminate\Support\Facades\Artisan;
+
+Artisan::command('inspire', function () {
+    $this->comment(Illuminate\Foundation\Inspiring::quote());
+})->purpose('Display an inspiring quote');
+
+use Illuminate\Support\Facades\Schedule;
+
+Schedule::command('wa:sync-media')->hourly();
+Schedule::command('broadcast:process-scheduled')->everyMinute();
+Schedule::command('db:backup-telegram')->dailyAt(\App\Models\Setting::get('backup_time', '01:00'));

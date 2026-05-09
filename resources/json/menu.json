@@ -1,0 +1,124 @@
+[
+    {
+        "type": "link",
+        "title": "Dashboard",
+        "url": "dashboard",
+        "icon": "ki-element-11",
+        "permission": "dashboard.view"
+    },
+    {
+        "type": "heading",
+        "title": "CRM"
+    },
+    {
+        "type": "link",
+        "title": "Chat",
+        "url": "chat",
+        "icon": "ki-message-text-2",
+        "permission": "chat.view"
+    },
+    {
+        "type": "link",
+        "title": "Customer",
+        "url": "customers",
+        "icon": "ki-people",
+        "permission": "customers.view"
+    },
+    {
+        "type": "link",
+        "title": "Perusahaan",
+        "url": "companies",
+        "icon": "ki-briefcase",
+        "permission": "companies.view"
+    },
+    {
+        "type": "link",
+        "title": "Deals",
+        "url": "deals",
+        "icon": "ki-abstract-26",
+        "permission": "deals.view"
+    },
+    {
+        "type": "heading",
+        "title": "Master Data"
+    },
+    {
+        "type": "link",
+        "title": "Label",
+        "url": "labels",
+        "icon": "ki-tag",
+        "permission": "labels.view"
+    },
+    {
+        "type": "heading",
+        "title": "Komunikasi"
+    },
+    {
+        "type": "link",
+        "title": "Auto Reply",
+        "url": "auto-replies",
+        "icon": "ki-message-programming",
+        "permission": "auto_replies.view"
+    },
+    {
+        "type": "link",
+        "title": "Broadcast",
+        "url": "broadcasts",
+        "icon": "ki-send",
+        "permission": "broadcasts.view"
+    },
+    {
+        "type": "link",
+        "title": "Template Chat",
+        "url": "templates",
+        "icon": "ki-message-text",
+        "permission": "templates.view"
+    },
+    {
+        "type": "heading",
+        "title": "Report"
+    },
+    {
+        "type": "link",
+        "title": "Laporan Harian",
+        "url": "reports/daily",
+        "icon": "ki-chart-line-up",
+        "permission": "dashboard.view"
+    },
+    {
+        "type": "heading",
+        "title": "Pengaturan"
+    },
+    {
+        "type": "link",
+        "title": "Pengguna",
+        "url": "users",
+        "icon": "ki-user",
+        "permission": "users.view"
+    },
+    {
+        "type": "link",
+        "title": "Role & Akses",
+        "url": "roles",
+        "icon": "ki-shield-tick",
+        "permission": "roles.view"
+    },
+    {
+        "type": "link",
+        "title": "Pengaturan",
+        "url": "settings",
+        "icon": "ki-setting-2",
+        "permission": "settings.view"
+    },
+    {
+        "type": "heading",
+        "title": "Dokumentasi"
+    },
+    {
+        "type": "link",
+        "title": "API",
+        "url": "docs/api",
+        "icon": "ki-code",
+        "permission": "api.view"
+    }
+]

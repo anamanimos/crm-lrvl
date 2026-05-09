@@ -1,0 +1,16 @@
+.sticky-lg-top {
+    top: 100px !important;
+    z-index: 100;
+}
+
+#category-form .indicator-progress {
+    display: none;
+}
+
+#category-form[data-kt-indicator="on"] .indicator-label {
+    display: none;
+}
+
+#category-form[data-kt-indicator="on"] .indicator-progress {
+    display: inline-block;
+}
