@@ -199,7 +199,6 @@ class MigrateLegacyData extends Command
             }
         }
     }
-    }
 
     protected function resetPasswords()
     {
