@@ -155,35 +155,25 @@ class MigrateLegacyData extends Command
                             }
                         }
                         
-                        if ($isMerge && $hasId && isset($cleanRow['id'])) {
-                            // Single row updateOrInsert for merge safety
-                            DB::table($table)->updateOrInsert(['id' => $cleanRow['id']], $cleanRow);
-                        } else {
-                            $insertData[] = $cleanRow;
-                        }
+                        $insertData[] = $cleanRow;
                     }
 
-                    if (!$isMerge && !empty($insertData)) {
+                    if (!empty($insertData)) {
                         try {
-                            DB::table($table)->insert($insertData);
+                            if ($isMerge) {
+                                // In merge mode, skip duplicates to preserve new data
+                                DB::table($table)->insertOrIgnore($insertData);
+                            } else {
+                                DB::table($table)->insert($insertData);
+                            }
                         } catch (\Exception $e) {
                             $this->warn("     Chunk failed for {$table}, trying one by one...");
                             foreach ($insertData as $data) {
                                 try {
-                                    // Use insertOrIgnore if available to skip duplicates in merge-like situations
                                     DB::table($table)->insertOrIgnore($data);
                                 } catch (\Exception $e2) {
-                                    Log::error("Failed to migrate row in {$table}: " . $e2->getMessage(), ['data' => $data]);
+                                    Log::error("Failed to migrate row in {$table}: " . $e2->getMessage());
                                 }
-                            }
-                        }
-                    } elseif ($isMerge && !empty($insertData) && !$hasId) {
-                        // Merge mode for tables without ID (pivots etc)
-                        foreach ($insertData as $data) {
-                            try {
-                                DB::table($table)->insertOrIgnore($data);
-                            } catch (\Exception $e2) {
-                                Log::error("Failed to merge row in {$table}: " . $e2->getMessage());
                             }
                         }
                     }
