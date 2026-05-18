@@ -314,9 +314,9 @@ class WebhookController extends Controller
 
         if (!empty($messageIds) && $status) {
             foreach ($messageIds as $id) {
-                $exists = Message::where('wa_message_id', $id)->exists();
+                $msg = Message::where('wa_message_id', $id)->first();
                 
-                if (!$exists) {
+                if (!$msg) {
                     // --- ACK ID CAPTURE (Gunakan chat_id untuk mencari pesan yang "menggantung") ---
                     $phone = $this->extractPhone($data, true);
                     if ($phone) {
@@ -333,12 +333,22 @@ class WebhookController extends Controller
                             
                             if ($pending) {
                                 $pending->update(['wa_message_id' => $id]);
+                                $msg = $pending;
                             }
                         }
                     }
                 }
                 
-                Message::where('wa_message_id', $id)->update(['status' => $status]);
+                if ($msg) {
+                    $statusWeight = ['pending' => 0, 'unread' => 0, 'sent' => 1, 'delivered' => 2, 'read' => 3, 'played' => 4];
+                    $currentWeight = $statusWeight[$msg->status] ?? -1;
+                    $newWeight = $statusWeight[$status] ?? -1;
+
+                    // Prevent downgrading status (e.g., read -> delivered)
+                    if ($newWeight >= $currentWeight || $currentWeight === -1) {
+                        $msg->update(['status' => $status]);
+                    }
+                }
             }
         }
     }
