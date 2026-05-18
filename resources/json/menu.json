@@ -83,7 +83,7 @@
         "title": "Laporan Harian",
         "url": "reports/daily",
         "icon": "ki-chart-line-up",
-        "permission": "dashboard.view"
+        "permission": "reports.view"
     },
     {
         "type": "heading",

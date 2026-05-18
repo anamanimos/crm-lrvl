@@ -188,12 +188,14 @@
                                                 </div>
                                             </div>
                                         @elseif($item['type'] == 'link')
+                                            @if(!isset($item['permission']) || auth()->user()->hasPermission($item['permission']))
                                             <div class="menu-item">
                                                 <a class="menu-link {{ $currentUrl == $item['url'] ? 'active' : '' }}" href="{{ url($item['url']) }}">
                                                     <span class="menu-icon"><i class="ki-outline {{ $item['icon'] }} fs-2"></i></span>
                                                     <span class="menu-title">{{ $item['title'] }}</span>
                                                 </a>
                                             </div>
+                                            @endif
                                         @endif
                                     @endforeach
                                 </div>

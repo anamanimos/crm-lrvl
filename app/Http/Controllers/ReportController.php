@@ -78,6 +78,10 @@ class ReportController extends Controller
 
     public function daily(Request $request)
     {
+        if (!auth()->user()->hasPermission('reports.view')) {
+            abort(403, 'Anda tidak memiliki akses ke laporan harian.');
+        }
+
         $bh = $this->getBusinessHours();
         $now = Carbon::now();
         
@@ -425,6 +429,10 @@ class ReportController extends Controller
 
     public function agentDetail(Request $request, $id)
     {
+        if (!auth()->user()->hasPermission('reports.view')) {
+            abort(403, 'Anda tidak memiliki akses ke detail agen.');
+        }
+
         $agent = User::findOrFail($id);
         $dateInput = $request->input('date', date('Y-m-d'));
         $date = Carbon::parse($dateInput);
