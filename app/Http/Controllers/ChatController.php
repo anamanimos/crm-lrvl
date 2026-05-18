@@ -366,11 +366,13 @@ class ChatController extends Controller
             if (!$group) return response()->json(['error' => 'Group not found'], 404);
             $target_number = $group->jid;
             $wa_group_id = $chat_id;
+            $group->update(['last_chat_at' => now()]);
         } else {
             $customer = Customer::find($chat_id);
             if (!$customer) return response()->json(['error' => 'Customer not found'], 404);
             $target_number = $customer->wa_number;
             $customer_id = $chat_id;
+            $customer->update(['last_chat_at' => now()]);
         }
 
         $result = $this->waGateway->sendMessage($target_number, $content, $reply_message_id);
@@ -413,6 +415,7 @@ class ChatController extends Controller
             }
             $target_number = $group->jid;
             $wa_group_id = $chat_id;
+            $group->update(['last_chat_at' => now()]);
         } else {
             $customer = Customer::find($chat_id);
             if (!$customer) {
@@ -420,6 +423,7 @@ class ChatController extends Controller
             }
             $target_number = $customer->wa_number;
             $customer_id = $chat_id;
+            $customer->update(['last_chat_at' => now()]);
         }
 
         return [true, $target_number, $customer_id, $wa_group_id, null];
@@ -661,12 +665,14 @@ class ChatController extends Controller
                 if ($group) {
                     $target_number = $group->jid;
                     $wa_group_id = $target_id;
+                    $group->update(['last_chat_at' => now()]);
                 }
             } else {
                 $customer = Customer::find($target_id);
                 if ($customer) {
                     $target_number = $customer->wa_number;
                     $customer_id = $target_id;
+                    $customer->update(['last_chat_at' => now()]);
                 }
             }
 

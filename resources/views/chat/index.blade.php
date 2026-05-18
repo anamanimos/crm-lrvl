@@ -4,6 +4,10 @@
     <style>
         .app-footer { display: none !important; }
         #kt_app_content_container { height: calc(100vh - 80px) !important; }
+        .app-container {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
         
         #chat-context-menu {
             border-radius: 8px;
@@ -75,7 +79,7 @@
             
             <div class="d-flex flex-column flex-lg-row h-100 g-0">
                 <!--begin::Sidebar-->
-                <div class="flex-column flex-lg-row-auto w-100 w-lg-450px w-xl-500px border-end bg-white h-100 d-flex flex-column">
+                <div class="flex-column flex-lg-row-auto w-100 w-lg-350px w-xl-400px border-end bg-white h-100 d-flex flex-column">
                     <!--begin::Sidebar Header-->
                     <div class="card-header pt-5 px-5 border-bottom bg-white d-flex align-items-center justify-content-between" id="chat_contacts_header" style="min-height: 70px;">
                         <button type="button" class="btn btn-icon btn-sm btn-light-primary me-2 flex-shrink-0" data-bs-toggle="modal" data-bs-target="#modal_new_chat" title="Mulai Chat Baru">
