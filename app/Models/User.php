@@ -56,17 +56,22 @@ class User extends Authenticatable
         ];
     }
 
-    public function role()
+    public function dbRole()
     {
-        return $this->belongsTo(Role::class);
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
     public function hasPermission($permission)
     {
-        if ($this->role && $this->role->slug === 'superadmin') {
+        if ($this->role === 'superadmin') {
             return true;
         }
 
-        return $this->role ? $this->role->permissions()->where('slug', $permission)->exists() : false;
+        $role = $this->dbRole;
+        if ($role && $role->slug === 'superadmin') {
+            return true;
+        }
+
+        return $role ? $role->permissions()->where('slug', $permission)->exists() : false;
     }
 }
