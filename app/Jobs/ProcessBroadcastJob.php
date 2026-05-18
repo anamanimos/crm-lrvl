@@ -13,6 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use App\Models\Setting;
 
 class ProcessBroadcastJob implements ShouldQueue
 {
@@ -45,17 +46,58 @@ class ProcessBroadcastJob implements ShouldQueue
             return;
         }
 
+        // Rate Limiting Checks (Using Global Settings)
+        $maxPerDay = (int) Setting::get('broadcast_max_per_day', 0);
+        if ($maxPerDay > 0) {
+            $sentThisDay = BroadcastRecipient::where('status', 'sent')
+                ->whereNotNull('sent_at')
+                ->where('sent_at', '>=', now()->startOfDay())
+                ->count();
+                
+            if ($sentThisDay >= $maxPerDay) {
+                $nextDay = now()->addDay()->startOfDay();
+                Log::info("Global max_per_day ({$maxPerDay}) reached for Broadcast {$broadcast->id}. Delaying to {$nextDay}");
+                ProcessBroadcastJob::dispatch($broadcast)->delay($nextDay);
+                return;
+            }
+        }
+
+        $maxPerHour = (int) Setting::get('broadcast_max_per_hour', 0);
+        if ($maxPerHour > 0) {
+            $sentThisHour = BroadcastRecipient::where('status', 'sent')
+                ->whereNotNull('sent_at')
+                ->where('sent_at', '>=', now()->startOfHour())
+                ->count();
+                
+            if ($sentThisHour >= $maxPerHour) {
+                $nextHour = now()->addHour()->startOfHour();
+                Log::info("Global max_per_hour ({$maxPerHour}) reached for Broadcast {$broadcast->id}. Delaying to {$nextHour}");
+                ProcessBroadcastJob::dispatch($broadcast)->delay($nextHour);
+                return;
+            }
+        }
+
         try {
             $customer = $recipient->customer;
             
+            // Check if template is a JSON array
+            $templates = json_decode($broadcast->message_template, true);
+            if (is_array($templates) && count($templates) > 0) {
+                $selectedTemplate = $templates[array_rand($templates)];
+            } else {
+                $selectedTemplate = $broadcast->message_template;
+            }
+
             // Process Spintax
-            $message = $this->processSpintax($broadcast->message_template);
+            $message = $this->processSpintax($selectedTemplate);
             
             // Replace Variables
             $message = str_replace('{name}', $customer->name, $message);
             $message = str_replace('{wa_number}', $customer->wa_number, $message);
 
             $mediaSent = false;
+            $waMessageId = null;
+
             if (!empty($broadcast->media_path)) {
                 $mediaUrl = $broadcast->media_path;
                 if (!Str::startsWith($mediaUrl, ['http://', 'https://'])) {
@@ -64,18 +106,20 @@ class ProcessBroadcastJob implements ShouldQueue
 
                 try {
                     if ($broadcast->media_type === 'image') {
-                        $waGateway->sendImageUrl($customer->wa_number, $mediaUrl, $message);
+                        $result = $waGateway->sendImageUrl($customer->wa_number, $mediaUrl, $message);
                     } else {
-                        $waGateway->sendDocumentUrl($customer->wa_number, $mediaUrl, basename($mediaUrl), $message);
+                        $result = $waGateway->sendDocumentUrl($customer->wa_number, $mediaUrl, basename($mediaUrl), $message);
                     }
                     $mediaSent = true;
+                    $waMessageId = $result['data']['results']['message_id'] ?? null;
                 } catch (\Exception $e) {
                     Log::error("Broadcast Media Send Failed: " . $e->getMessage());
                 }
             }
 
             if (!$mediaSent) {
-                $waGateway->sendMessage($customer->wa_number, $message);
+                $result = $waGateway->sendMessage($customer->wa_number, $message);
+                $waMessageId = $result['data']['results']['message_id'] ?? null;
             }
 
             $recipient->update(['status' => 'sent', 'sent_at' => now()]);
@@ -98,7 +142,14 @@ class ProcessBroadcastJob implements ShouldQueue
                 'type' => $mediaSent ? $broadcast->media_type : 'text',
                 'media_url' => $mediaSent ? $broadcast->media_path : null,
                 'status' => 'sent',
+                'wa_message_id' => $waMessageId,
+                'wa_timestamp' => time(),
             ]);
+
+            // Update customer last_chat_at so it moves to top in chat list
+            if ($customer) {
+                $customer->update(['last_chat_at' => now()]);
+            }
 
             // Dispatch next job with random delay
             $delay = rand($broadcast->delay_min, $broadcast->delay_max);

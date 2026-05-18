@@ -100,6 +100,52 @@
                             </div>
                         </div>
                         <!--end::Stat-->
+
+                        <!--begin::Stat: Limit Jam Ini-->
+                        <div class="card card-flush mb-5 bg-light-info border-0">
+                            <div class="card-header pt-5">
+                                <div class="card-title d-flex flex-column">
+                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">{{ number_format($globalStats['sent_this_hour']) }} <span class="fs-4 text-gray-500">/ {{ $globalStats['max_per_hour'] ?: '∞' }}</span></span>
+                                    <span class="text-gray-500 pt-1 fw-semibold fs-6">Terpakai Jam Ini</span>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex align-items-end pt-0">
+                                @php
+                                    $pctHour = $globalStats['max_per_hour'] > 0 ? min(100, round(($globalStats['sent_this_hour'] / $globalStats['max_per_hour']) * 100)) : 0;
+                                    $colorHour = $pctHour >= 90 ? 'danger' : ($pctHour >= 75 ? 'warning' : 'info');
+                                @endphp
+                                <div class="d-flex align-items-center flex-column mt-3 w-100">
+                                    <div class="h-8px mx-3 w-100 bg-white bg-opacity-50 rounded">
+                                        <div class="bg-{{ $colorHour }} rounded h-8px" role="progressbar" style="width: {{ $globalStats['max_per_hour'] > 0 ? $pctHour : 100 }}%;"></div>
+                                    </div>
+                                </div>
+                                <i class="ki-outline ki-time fs-2x text-info opacity-25 position-absolute end-0 bottom-0 me-5 mb-5"></i>
+                            </div>
+                        </div>
+                        <!--end::Stat-->
+
+                        <!--begin::Stat: Limit Hari Ini-->
+                        <div class="card card-flush mb-5 bg-light-danger border-0">
+                            <div class="card-header pt-5">
+                                <div class="card-title d-flex flex-column">
+                                    <span class="fs-2hx fw-bold text-gray-900 me-2 lh-1 ls-n2">{{ number_format($globalStats['sent_this_day']) }} <span class="fs-4 text-gray-500">/ {{ $globalStats['max_per_day'] ?: '∞' }}</span></span>
+                                    <span class="text-gray-500 pt-1 fw-semibold fs-6">Terpakai Hari Ini</span>
+                                </div>
+                            </div>
+                            <div class="card-body d-flex align-items-end pt-0">
+                                @php
+                                    $pctDay = $globalStats['max_per_day'] > 0 ? min(100, round(($globalStats['sent_this_day'] / $globalStats['max_per_day']) * 100)) : 0;
+                                    $colorDay = $pctDay >= 90 ? 'danger' : ($pctDay >= 75 ? 'warning' : 'danger');
+                                @endphp
+                                <div class="d-flex align-items-center flex-column mt-3 w-100">
+                                    <div class="h-8px mx-3 w-100 bg-white bg-opacity-50 rounded">
+                                        <div class="bg-{{ $colorDay }} rounded h-8px" role="progressbar" style="width: {{ $globalStats['max_per_day'] > 0 ? $pctDay : 100 }}%;"></div>
+                                    </div>
+                                </div>
+                                <i class="ki-outline ki-calendar fs-2x text-danger opacity-25 position-absolute end-0 bottom-0 me-5 mb-5"></i>
+                            </div>
+                        </div>
+                        <!--end::Stat-->
                     </div>
                     <!--end::Left Column-->
 

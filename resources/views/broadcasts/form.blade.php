@@ -54,14 +54,29 @@
                                             </div>
 
                                             <div class="fv-row mb-10">
-                                                <label class="required fs-6 fw-semibold mb-2">Konten Pesan</label>
-                                                <textarea name="message_template" id="input-content" class="form-control form-control-solid @error('message_template') is-invalid @enderror" 
-                                                          rows="12" placeholder="Tulis pesan di sini..." required>{{ old('message_template') }}</textarea>
+                                                <div class="d-flex flex-stack mb-2">
+                                                    <label class="required fs-6 fw-semibold">Konten Pesan</label>
+                                                    <button type="button" class="btn btn-sm btn-light-primary" id="btn-add-message">
+                                                        <i class="ki-outline ki-plus fs-2"></i> Tambah Variasi Pesan
+                                                    </button>
+                                                </div>
+                                                
+                                                <div id="messages-container">
+                                                    <div class="message-item position-relative mb-4">
+                                                        <div class="d-flex justify-content-between mb-1">
+                                                            <span class="badge badge-light-primary">Pesan 1</span>
+                                                        </div>
+                                                        <textarea name="message_template[]" class="form-control form-control-solid message-input @error('message_template') is-invalid @enderror" 
+                                                                  rows="6" placeholder="Tulis pesan di sini..." required>{{ old('message_template.0') }}</textarea>
+                                                    </div>
+                                                </div>
+                                                
                                                 <div class="text-muted fs-7 mt-3">
                                                     <p class="mb-1">Gunakan variabel: <code>{name}</code>, <code>{wa_number}</code></p>
                                                     <p class="mb-0">Dukung Spintax: <code>{Halo|Hai|Selamat Pagi}</code> untuk variasi kata.</p>
+                                                    <p class="mb-0 mt-1"><span class="badge badge-light-info">Info</span> Sistem akan memilih salah satu pesan secara acak untuk setiap penerima agar terhindar dari banned.</p>
                                                 </div>
-                                                @error('message_template') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                                @error('message_template') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                             </div>
 
                                             <div class="fv-row mb-0">
@@ -179,6 +194,17 @@
                                         <h3 id="preview-header-title" class="card-title text-white fs-6 fw-bold text-truncate">Pratinjau Broadcast</h3>
                                     </div>
                                     <div class="card-body p-4">
+                                        <!-- Preview Navigation -->
+                                        <div class="d-flex justify-content-between align-items-center mb-3 bg-white p-2 rounded shadow-sm d-none" id="preview-nav">
+                                            <button type="button" class="btn btn-sm btn-icon btn-light-primary" id="btn-prev-preview">
+                                                <i class="ki-outline ki-left fs-4"></i>
+                                            </button>
+                                            <span class="badge badge-light-primary fs-7 fw-bold" id="preview-indicator">Pesan 1 dari 1</span>
+                                            <button type="button" class="btn btn-sm btn-icon btn-light-primary" id="btn-next-preview">
+                                                <i class="ki-outline ki-right fs-4"></i>
+                                            </button>
+                                        </div>
+
                                         <!-- WhatsApp Bubble -->
                                         <div class="d-flex flex-column gap-3">
                                             <div class="bg-white p-3 rounded-3 shadow-sm position-relative" style="max-width: 100%;">
@@ -236,7 +262,7 @@
                 
                 const $ = jQuery;
                 const inputName = $('#input-name');
-                const inputContent = $('#input-content');
+                const messagesContainer = $('#messages-container');
                 const targetType = $('#target-type');
                 const labelWrapper = $('#target-label-wrapper');
                 const customWrapper = $('#target-custom-wrapper');
@@ -279,8 +305,92 @@
                     previewHeaderTitle.text(val.trim() === '' ? "Pratinjau Broadcast" : val);
                 });
 
-                inputContent.on('input keyup change', function() {
-                    updateContentPreview($(this).val());
+                // Messages logic
+                const btnAddMessage = $('#btn-add-message');
+                let messageCount = 1;
+                let currentPreviewIndex = 0;
+
+                function updatePreviewNav() {
+                    const totalMessages = messagesContainer.find('.message-item').length;
+                    
+                    if (totalMessages > 1) {
+                        $('#preview-nav').removeClass('d-none');
+                        $('#preview-indicator').text(`Pesan ${currentPreviewIndex + 1} dari ${totalMessages}`);
+                    } else {
+                        $('#preview-nav').addClass('d-none');
+                    }
+                    
+                    // Show current message preview
+                    const inputs = messagesContainer.find('.message-input');
+                    if (inputs[currentPreviewIndex]) {
+                        updateContentPreview($(inputs[currentPreviewIndex]).val());
+                    } else {
+                        currentPreviewIndex = 0;
+                        if (inputs[0]) updateContentPreview($(inputs[0]).val());
+                    }
+                }
+
+                $('#btn-prev-preview').on('click', function() {
+                    const totalMessages = messagesContainer.find('.message-item').length;
+                    if (totalMessages === 0) return;
+                    currentPreviewIndex = (currentPreviewIndex - 1 + totalMessages) % totalMessages;
+                    updatePreviewNav();
+                });
+
+                $('#btn-next-preview').on('click', function() {
+                    const totalMessages = messagesContainer.find('.message-item').length;
+                    if (totalMessages === 0) return;
+                    currentPreviewIndex = (currentPreviewIndex + 1) % totalMessages;
+                    updatePreviewNav();
+                });
+
+                btnAddMessage.on('click', function() {
+                    messageCount++;
+                    const newItem = $(`
+                        <div class="message-item position-relative mb-4" style="display:none;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="badge badge-light-primary">Pesan ${messageCount}</span>
+                                <button type="button" class="btn btn-sm btn-icon btn-light-danger btn-remove-message">
+                                    <i class="ki-outline ki-trash fs-5"></i>
+                                </button>
+                            </div>
+                            <textarea name="message_template[]" class="form-control form-control-solid message-input" rows="6" placeholder="Tulis variasi pesan ke-${messageCount} di sini..." required></textarea>
+                        </div>
+                    `);
+                    messagesContainer.append(newItem);
+                    newItem.slideDown(200);
+                    updatePreviewNav();
+                });
+
+                messagesContainer.on('click', '.btn-remove-message', function() {
+                    if (messagesContainer.find('.message-item').length > 1) {
+                        const item = $(this).closest('.message-item');
+                        const index = item.index();
+                        item.slideUp(200, function() {
+                            $(this).remove();
+                            updateMessageBadges();
+                            
+                            if (currentPreviewIndex >= messagesContainer.find('.message-item').length) {
+                                currentPreviewIndex = Math.max(0, messagesContainer.find('.message-item').length - 1);
+                            } else if (index < currentPreviewIndex) {
+                                currentPreviewIndex--;
+                            }
+                            updatePreviewNav();
+                        });
+                    }
+                });
+
+                function updateMessageBadges() {
+                    messageCount = 0;
+                    messagesContainer.find('.message-item').each(function() {
+                        messageCount++;
+                        $(this).find('.badge').text('Pesan ' + messageCount);
+                    });
+                }
+
+                messagesContainer.on('input keyup change focus', '.message-input', function() {
+                    currentPreviewIndex = $(this).closest('.message-item').index();
+                    updatePreviewNav();
                 });
 
                 function toggleTarget() {
@@ -359,7 +469,7 @@
                 });
 
                 // Initial trigger
-                if(inputContent.val()) updateContentPreview(inputContent.val());
+                updatePreviewNav();
 
                 // --- Media Preview ---
                 const inputMedia = $('#input-media');

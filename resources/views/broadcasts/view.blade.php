@@ -184,7 +184,20 @@
                                             @endif
                                         </div>
                                     @endif
-                                    <div class="text-gray-800 fs-5 lh-lg whitespace-pre-wrap" style="white-space: pre-wrap;">{{ $broadcast->message_template }}</div>
+                                    @php
+                                        $templates = json_decode($broadcast->message_template, true);
+                                    @endphp
+                                    @if(is_array($templates) && count($templates) > 0)
+                                        @foreach($templates as $index => $tmpl)
+                                            <div class="mb-5">
+                                                <span class="badge badge-primary mb-3">Pesan {{ $index + 1 }}</span>
+                                                <div class="text-gray-800 fs-5 lh-lg whitespace-pre-wrap" style="white-space: pre-wrap;">{{ $tmpl }}</div>
+                                            </div>
+                                            @if(!$loop->last) <div class="separator separator-dashed border-primary my-5 opacity-25"></div> @endif
+                                        @endforeach
+                                    @else
+                                        <div class="text-gray-800 fs-5 lh-lg whitespace-pre-wrap" style="white-space: pre-wrap;">{{ $broadcast->message_template }}</div>
+                                    @endif
                                     <div class="position-absolute top-0 end-0 p-3">
                                         <i class="ki-outline ki-whatsapp text-success fs-2hx opacity-25"></i>
                                     </div>

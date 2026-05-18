@@ -30,10 +30,27 @@ class BroadcastController extends Controller
     {
         $broadcasts = Broadcast::with('creator')->latest()->get();
         
+        $sentThisHour = BroadcastRecipient::where('status', 'sent')
+            ->whereNotNull('sent_at')
+            ->where('sent_at', '>=', now()->startOfHour())
+            ->count();
+            
+        $sentThisDay = BroadcastRecipient::where('status', 'sent')
+            ->whereNotNull('sent_at')
+            ->where('sent_at', '>=', now()->startOfDay())
+            ->count();
+
+        $maxPerHour = (int) Setting::get('broadcast_max_per_hour', 0);
+        $maxPerDay = (int) Setting::get('broadcast_max_per_day', 0);
+
         $globalStats = [
             'total_broadcasts' => $broadcasts->count(),
             'total_sent' => BroadcastRecipient::where('status', 'sent')->count(),
             'total_pending' => BroadcastRecipient::where('status', 'pending')->count(),
+            'sent_this_hour' => $sentThisHour,
+            'sent_this_day' => $sentThisDay,
+            'max_per_hour' => $maxPerHour,
+            'max_per_day' => $maxPerDay,
         ];
 
         // Calculate stats for each broadcast
@@ -71,7 +88,8 @@ class BroadcastController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:100',
-            'message_template' => 'required|string',
+            'message_template' => 'required|array|min:1',
+            'message_template.*' => 'required|string',
             'target_type' => 'required|in:all,label,custom',
             'delay_min' => 'required|integer|min:1',
             'delay_max' => 'required|integer|min:1|gte:delay_min',
@@ -91,7 +109,7 @@ class BroadcastController extends Controller
 
             $broadcast = Broadcast::create([
                 'name' => $request->name,
-                'message_template' => $request->message_template,
+                'message_template' => json_encode($request->message_template),
                 'target_type' => $request->target_type,
                 'target_filters' => $filters,
                 'delay_min' => $request->delay_min,
