@@ -41,7 +41,7 @@ class ChatController extends Controller
 
         $labels = Label::all();
         $deal_stages = DealStage::orderBy('sort_order')->get();
-        $agents = User::whereHas('role', function($q) {
+        $agents = User::whereHas('dbRole', function($q) {
             $q->whereIn('slug', ['superadmin', 'admin', 'cs', 'sales']);
         })->get();
 
