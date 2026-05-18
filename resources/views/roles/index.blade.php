@@ -145,7 +145,7 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch("{{ url('admin/roles/delete') }}/" + id, { 
+                        fetch("{{ url('roles/delete') }}/" + id, { 
                             method: 'POST',
                             headers: {
                                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')

@@ -206,7 +206,7 @@
             btn.html('<span class="spinner-border spinner-border-sm"></span> Menyimpan...');
             
             $.ajax({
-                url: appUrl + 'admin/roles/save-permissions',
+                url: appUrl + 'roles/save-permissions',
                 method: 'POST',
                 data: form.serialize(),
                 dataType: 'json',
