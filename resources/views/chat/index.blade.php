@@ -230,17 +230,7 @@
                             </div>
                         </div>
 
-                        <script>
-                            // Fallback visibility for refresh button
-                            $(document).on('click', '.customer-item', function() {
-                                const type = $(this).data('type');
-                                if (type === 'group') {
-                                    $('#btn-refresh-group').attr('style', 'display: inline-flex !important');
-                                } else {
-                                    $('#btn-refresh-group').attr('style', 'display: none !important');
-                                }
-                            });
-                        </script>
+
                         <!--end::Chat Header-->
                         
                         <!--begin::Chat Body-->
@@ -475,10 +465,21 @@
     <script>
         var appUrl = "{{ url('/') }}/";
         var selectedCustomerId = {{ $selected_customer ? $selected_customer->id : 'null' }};
+        var currentUserId = {{ auth()->id() ?? 'null' }};
         
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Fallback visibility for refresh button
+        $(document).on('click', '.customer-item', function() {
+            const type = $(this).data('type');
+            if (type === 'group') {
+                $('#btn-refresh-group').attr('style', 'display: inline-flex !important');
+            } else {
+                $('#btn-refresh-group').attr('style', 'display: none !important');
             }
         });
     </script>
