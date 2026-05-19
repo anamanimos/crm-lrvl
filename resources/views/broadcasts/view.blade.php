@@ -100,9 +100,14 @@
                                 
                                 <div class="mt-8">
                                     @if($broadcast->status == 'draft' || $broadcast->status == 'paused' || $broadcast->status == 'scheduled')
-                                    <a href="{{ route('admin.broadcasts.action', [$broadcast->id, 'start']) }}" class="btn btn-primary w-100">
-                                        <i class="ki-outline ki-entrance-left fs-2"></i> Mulai Broadcast Sekarang
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        <a href="{{ route('admin.broadcasts.action', [$broadcast->id, 'start']) }}" class="btn btn-primary w-100">
+                                            <i class="ki-outline ki-entrance-left fs-2"></i> Mulai
+                                        </a>
+                                        <a href="{{ route('admin.broadcasts.edit', $broadcast->id) }}" class="btn btn-light-primary w-100">
+                                            <i class="ki-outline ki-pencil fs-2"></i> Edit
+                                        </a>
+                                    </div>
                                     @elseif($broadcast->status == 'running')
                                     <a href="{{ route('admin.broadcasts.action', [$broadcast->id, 'pause']) }}" class="btn btn-warning w-100 mb-4">
                                         <i class="ki-outline ki-pause fs-2"></i> Pause
@@ -234,9 +239,70 @@
                         </div>
                     </div>
                     <!--end::Right Column-->
-                </div>
-
             </div>
+            
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card card-flush">
+                        <div class="card-header pt-7">
+                            <h3 class="card-title fw-bold">Daftar Penerima</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                                            <th class="min-w-150px">Pelanggan</th>
+                                            <th class="min-w-100px">Status</th>
+                                            <th class="min-w-150px">Waktu Kirim</th>
+                                            <th class="min-w-300px">Pesan Terkirim</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-semibold">
+                                        @foreach($recipients as $recipient)
+                                        <tr>
+                                            <td>
+                                                <div class="d-flex flex-column">
+                                                    <span class="text-gray-800 fw-bold mb-1">{{ $recipient->customer->name ?? 'Unknown' }}</span>
+                                                    <span class="text-muted fs-7">{{ $recipient->customer->wa_number ?? '-' }}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                @php
+                                                    $statusBadge = 'badge-light-secondary';
+                                                    if ($recipient->status == 'sent') $statusBadge = 'badge-light-success';
+                                                    elseif ($recipient->status == 'failed') $statusBadge = 'badge-light-danger';
+                                                    elseif ($recipient->status == 'pending') $statusBadge = 'badge-light-warning';
+                                                @endphp
+                                                <span class="badge {{ $statusBadge }} fw-bold px-3 py-1">{{ ucfirst($recipient->status) }}</span>
+                                            </td>
+                                            <td>
+                                                {{ $recipient->sent_at ? $recipient->sent_at->format('d M Y H:i:s') : '-' }}
+                                            </td>
+                                            <td>
+                                                <div class="text-gray-800 fs-7" style="white-space: pre-wrap; max-height: 100px; overflow-y: auto;">{{ $recipient->sent_message_text }}</div>
+                                            </td>
+                                        </tr>
+                                        @endforeach
+                                        
+                                        @if($recipients->isEmpty())
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-5">Belum ada penerima</td>
+                                        </tr>
+                                        @endif
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <div class="mt-5 d-flex justify-content-end">
+                                {{ $recipients->links('pagination::bootstrap-5') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
         </div>
         <!--end::Content-->
     </div>

@@ -226,7 +226,12 @@
                                                         <div class="menu-item px-3">
                                                             <a href="{{ route('admin.broadcasts.view', $item->id) }}" class="menu-link px-3">Detail</a>
                                                         </div>
-                                                        @if(in_array($item->status, ['draft', 'paused', 'cancelled']))
+                                                        @if(in_array($item->status, ['draft', 'paused', 'scheduled']))
+                                                        <div class="menu-item px-3">
+                                                            <a href="{{ route('admin.broadcasts.edit', $item->id) }}" class="menu-link px-3 text-primary">Edit</a>
+                                                        </div>
+                                                        @endif
+                                                        @if(in_array($item->status, ['draft', 'paused', 'cancelled', 'scheduled']))
                                                         <div class="menu-item px-3">
                                                             <form action="{{ route('admin.broadcasts.delete', $item->id) }}" method="POST" id="delete-form-{{ $item->id }}">
                                                                 @csrf

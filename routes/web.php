@@ -120,7 +120,9 @@ Route::middleware(['auth'])->group(function () {
         // Broadcasts
         Route::get('/broadcasts', [\App\Http\Controllers\BroadcastController::class, 'index'])->name('broadcasts.index');
         Route::get('/broadcasts/create', [\App\Http\Controllers\BroadcastController::class, 'create'])->name('broadcasts.create');
+        Route::get('/broadcasts/edit/{id}', [\App\Http\Controllers\BroadcastController::class, 'edit'])->name('broadcasts.edit');
         Route::post('/broadcasts/store', [\App\Http\Controllers\BroadcastController::class, 'store'])->name('broadcasts.store');
+        Route::post('/broadcasts/update/{id}', [\App\Http\Controllers\BroadcastController::class, 'update'])->name('broadcasts.update');
         Route::get('/broadcasts/view/{id}', [\App\Http\Controllers\BroadcastController::class, 'view'])->name('broadcasts.view');
         Route::get('/broadcasts/action/{id}/{action}', [\App\Http\Controllers\BroadcastController::class, 'action'])->name('broadcasts.action');
         Route::get('/broadcasts/stats/{id}', [\App\Http\Controllers\BroadcastController::class, 'stats'])->name('broadcasts.stats');

@@ -187,6 +187,140 @@ class BroadcastController extends Controller
         }
     }
 
+    public function edit($id)
+    {
+        $broadcast = Broadcast::findOrFail($id);
+        
+        if (in_array($broadcast->status, ['completed', 'running'])) {
+            return redirect()->route('admin.broadcasts.index')->with('error', 'Tidak dapat mengedit broadcast yang sedang berjalan atau sudah selesai');
+        }
+
+        $labels = Label::where('is_active', true)->get();
+        $customers = Customer::where('is_archived', false)->limit(1000)->get();
+        
+        return view('broadcasts.edit', compact('broadcast', 'labels', 'customers'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $broadcast = Broadcast::findOrFail($id);
+        
+        if (in_array($broadcast->status, ['completed', 'running'])) {
+            if ($request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Tidak dapat mengedit broadcast yang sedang berjalan atau sudah selesai'], 400);
+            }
+            return back()->with('error', 'Tidak dapat mengedit broadcast yang sedang berjalan atau sudah selesai');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'message_template' => 'required|array|min:1',
+            'message_template.*' => 'required|string',
+            'target_type' => 'required|in:all,label,custom',
+            'delay_min' => 'required|integer|min:1',
+            'delay_max' => 'required|integer|min:1|gte:delay_min',
+            'media_file' => 'nullable|file|max:5120',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            $filters = [];
+            if ($request->target_type == 'label') {
+                $filters['label_id'] = $request->label_id;
+            } elseif ($request->target_type == 'custom') {
+                $filters['customer_ids'] = $request->customer_ids;
+            }
+
+            $status = $broadcast->status;
+            // If it was scheduled and they removed schedule, it becomes draft. If they added schedule, it becomes scheduled.
+            if ($broadcast->status == 'draft' || $broadcast->status == 'scheduled') {
+                $status = $request->schedule_type == 'date' ? 'scheduled' : 'draft';
+            }
+
+            $broadcast->update([
+                'name' => $request->name,
+                'message_template' => json_encode($request->message_template),
+                'target_type' => $request->target_type,
+                'target_filters' => $filters,
+                'delay_min' => $request->delay_min,
+                'delay_max' => $request->delay_max,
+                'status' => $status,
+                'scheduled_at' => $request->scheduled_at,
+            ]);
+
+            // Handle Media Upload
+            if ($request->hasFile('media_file')) {
+                $file = $request->file('media_file');
+                if ($file->isValid()) {
+                    try {
+                        $cloudinary = $this->uploadToCloudinary($file);
+                        $broadcast->media_path = $cloudinary ? $cloudinary['url'] : $file->store('broadcasts/media', 'public');
+                    } catch (\Exception $e) {
+                        \Log::error('Broadcast Cloudinary Error: ' . $e->getMessage());
+                        $broadcast->media_path = $file->store('broadcasts/media', 'public');
+                    }
+                    $broadcast->media_type = Str::contains($file->getMimeType(), 'image') ? 'image' : 'document';
+                    $broadcast->save();
+                }
+            }
+
+            // Update Recipients
+            // Only recreate pending recipients
+            BroadcastRecipient::where('broadcast_id', $broadcast->id)->where('status', 'pending')->delete();
+
+            $customerQuery = Customer::where('is_archived', false);
+            
+            if ($request->target_type == 'label') {
+                $customerQuery->whereHas('labels', function($q) use ($request) {
+                    $q->where('labels.id', $request->label_id);
+                });
+            } elseif ($request->target_type == 'custom') {
+                $customerQuery->whereIn('id', $request->customer_ids ?: []);
+            }
+
+            $customerIds = $customerQuery->pluck('id')->toArray();
+            
+            // Exclude already sent or failed
+            $existingRecipientIds = BroadcastRecipient::where('broadcast_id', $broadcast->id)
+                ->whereIn('status', ['sent', 'failed'])
+                ->pluck('customer_id')
+                ->toArray();
+                
+            $newCustomerIds = array_diff($customerIds, $existingRecipientIds);
+
+            foreach ($newCustomerIds as $customerId) {
+                BroadcastRecipient::create([
+                    'broadcast_id' => $broadcast->id,
+                    'customer_id' => $customerId,
+                    'status' => 'pending',
+                ]);
+            }
+
+            DB::commit();
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Broadcast berhasil diupdate',
+                    'redirect' => route('admin.broadcasts.view', $broadcast->id)
+                ]);
+            }
+
+            return redirect()->route('admin.broadcasts.view', $broadcast->id)->with('success', 'Broadcast berhasil diupdate');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal mengupdate broadcast: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return back()->with('error', 'Gagal mengupdate broadcast: ' . $e->getMessage())->withInput();
+        }
+    }
+
     public function view($id)
     {
         $broadcast = Broadcast::with('creator')->findOrFail($id);
@@ -205,7 +339,33 @@ class BroadcastController extends Controller
             'pending' => $stats->pending ?: 0,
         ];
 
-        return view('broadcasts.view', compact('broadcast'));
+        $recipients = $broadcast->recipients()->with('customer')->paginate(20);
+        
+        // Load messages
+        $customerIds = $recipients->pluck('customer_id')->toArray();
+        if (!empty($customerIds)) {
+            $messages = \App\Models\Message::whereIn('customer_id', $customerIds)
+                ->where('user_id', $broadcast->created_by)
+                ->where('direction', 'out')
+                ->where('created_at', '>=', $broadcast->started_at ?? $broadcast->created_at)
+                ->get()
+                ->groupBy('customer_id');
+                
+            foreach ($recipients as $recipient) {
+                if ($recipient->status == 'sent' && isset($messages[$recipient->customer_id]) && $recipient->sent_at) {
+                    $recipientMsg = $messages[$recipient->customer_id]->first(function ($msg) use ($recipient) {
+                        return abs($msg->created_at->diffInSeconds($recipient->sent_at)) < 120; // within 2 minutes
+                    });
+                    $recipient->sent_message_text = $recipientMsg ? $recipientMsg->content : '(Pesan tidak ditemukan)';
+                } elseif ($recipient->status == 'failed') {
+                    $recipient->sent_message_text = $recipient->error_message ?: '(Gagal)';
+                } else {
+                    $recipient->sent_message_text = '(Belum dikirim)';
+                }
+            }
+        }
+
+        return view('broadcasts.view', compact('broadcast', 'recipients'));
     }
 
     public function stats($id)
