@@ -100,6 +100,7 @@ class DealController extends Controller
             'expected_value' => $request->expected_value ?? 0,
             'assigned_user_id' => $request->assigned_user_id ?? auth()->id(),
             'source' => $request->source,
+            'contact_start_date' => $request->contact_start_date,
             'next_followup_date' => $request->next_followup_date,
             'expected_close_date' => $request->expected_close_date,
         ]);

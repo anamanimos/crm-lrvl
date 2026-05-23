@@ -17,6 +17,7 @@ class Deal extends Model
         'assigned_user_id',
         'next_followup_date',
         'expected_close_date',
+        'contact_start_date',
         'lost_reason',
         'is_archived',
     ];
@@ -26,6 +27,7 @@ class Deal extends Model
         'is_archived' => 'boolean',
         'next_followup_date' => 'datetime',
         'expected_close_date' => 'date',
+        'contact_start_date' => 'date',
     ];
 
     protected static function booted()

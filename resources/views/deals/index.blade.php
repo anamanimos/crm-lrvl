@@ -159,9 +159,16 @@
 
                         <div class="row g-9 mb-7">
                             <div class="col-md-6 fv-row">
+                                <label class="fs-6 fw-semibold mb-2">Tgl Mulai Kontak (Opsional)</label>
+                                <input type="text" name="contact_start_date" class="form-control form-control-solid" placeholder="Pilih tanggal" />
+                            </div>
+                            <div class="col-md-6 fv-row">
                                 <label class="fs-6 fw-semibold mb-2">Tgl Follow-up Selanjutnya</label>
                                 <input type="text" name="next_followup_date" class="form-control form-control-solid" placeholder="Pilih tanggal & waktu" />
                             </div>
+                        </div>
+
+                        <div class="row g-9 mb-7">
                             <div class="col-md-6 fv-row">
                                 <label class="fs-6 fw-semibold mb-2">Perkiraan Closing</label>
                                 <input type="text" name="expected_close_date" class="form-control form-control-solid" placeholder="Pilih tanggal" />
@@ -331,6 +338,10 @@
             });
 
             loadBoard();
+
+            $('input[name="contact_start_date"]').flatpickr({
+                dateFormat: "Y-m-d",
+            });
 
             $('input[name="next_followup_date"]').flatpickr({
                 enableTime: true,
