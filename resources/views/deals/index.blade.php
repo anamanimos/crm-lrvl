@@ -160,11 +160,11 @@
                         <div class="row g-9 mb-7">
                             <div class="col-md-6 fv-row">
                                 <label class="fs-6 fw-semibold mb-2">Tgl Follow-up Selanjutnya</label>
-                                <input type="datetime-local" name="next_followup_date" class="form-control form-control-solid" />
+                                <input type="text" name="next_followup_date" class="form-control form-control-solid" placeholder="Pilih tanggal & waktu" />
                             </div>
                             <div class="col-md-6 fv-row">
                                 <label class="fs-6 fw-semibold mb-2">Perkiraan Closing</label>
-                                <input type="date" name="expected_close_date" class="form-control form-control-solid" />
+                                <input type="text" name="expected_close_date" class="form-control form-control-solid" placeholder="Pilih tanggal" />
                             </div>
                         </div>
                     </div>
@@ -179,9 +179,43 @@
         </div>
     </div>
 
+    <!-- Offcanvas: Deal Detail -->
+    <div id="kt_offcanvas_deal_detail" class="bg-body" data-kt-drawer="true" data-kt-drawer-name="deal_detail" data-kt-drawer-activate="true" data-kt-drawer-overlay="true" data-kt-drawer-width="{default:'100%', 'md': '500px'}" data-kt-drawer-direction="end" data-kt-drawer-toggle="#kt_offcanvas_deal_detail_toggle" data-kt-drawer-close="#kt_offcanvas_deal_detail_close">
+        <div class="card shadow-none w-100 rounded-0 overflow-auto h-100">
+            <div class="card-header" id="kt_offcanvas_deal_detail_header">
+                <h3 class="card-title fw-bold text-gray-900">Detail Deal</h3>
+                <div class="card-toolbar">
+                    <button type="button" class="btn btn-sm btn-icon btn-active-light-primary me-n5" id="kt_offcanvas_deal_detail_close">
+                        <i class="ki-outline ki-cross fs-1"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body position-relative" id="kt_offcanvas_deal_detail_body">
+                <!-- Content loaded via AJAX -->
+            </div>
+        </div>
+    </div>
+
     @push('js')
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script>
+        window.openDealDetail = function(uuid) {
+            var offcanvasElement = document.getElementById('kt_offcanvas_deal_detail');
+            var drawer = KTDrawer.getInstance(offcanvasElement);
+            if (!drawer) {
+                drawer = new KTDrawer(offcanvasElement);
+            }
+            
+            $('#kt_offcanvas_deal_detail_body').html('<div class="d-flex justify-content-center mt-10"><div class="spinner-border text-primary" role="status"></div></div>');
+            drawer.show();
+
+            $.get('{{ url("deals/detail") }}/' + uuid, function(res) {
+                $('#kt_offcanvas_deal_detail_body').html(res);
+            }).fail(function() {
+                $('#kt_offcanvas_deal_detail_body').html('<div class="alert alert-danger">Gagal memuat detail deal.</div>');
+            });
+        };
+
         $(document).ready(function() {
             const boardContainer = $('#kanban-container');
             const searchInput = $('#deal-search');
@@ -217,7 +251,7 @@
                                     <div class="card card-flush shadow-sm mb-4 cursor-grab kanban-deal-card border-0" data-id="${deal.id}">
                                         <div class="card-body p-5">
                                             <div class="d-flex flex-column gap-2">
-                                                <a href="{{ url('deals/detail') }}/${deal.uuid}" class="text-gray-800 text-hover-primary fw-boldest fs-6 mb-1">${deal.title}</a>
+                                                <a href="javascript:void(0)" onclick="openDealDetail('${deal.uuid}')" class="text-gray-800 text-hover-primary fw-boldest fs-6 mb-1">${deal.title}</a>
                                                 <div class="d-flex align-items-center gap-2 mb-2">
                                                     <i class="ki-outline ki-profile-circle fs-6 text-muted opacity-50"></i>
                                                     <span class="text-muted fs-7">${deal.customer ? deal.customer.name : 'Unknown'} ${deal.customer && deal.customer.wa_number ? ' - ' + deal.customer.wa_number : ''}</span>
@@ -280,6 +314,7 @@
             }
 
             $('#customer-select').select2({
+                tags: true,
                 ajax: {
                     url: '{{ route("admin.customers.search") }}',
                     dataType: 'json',
@@ -296,6 +331,15 @@
             });
 
             loadBoard();
+
+            $('input[name="next_followup_date"]').flatpickr({
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+            });
+
+            $('input[name="expected_close_date"]').flatpickr({
+                dateFormat: "Y-m-d",
+            });
 
             let searchTimer;
             searchInput.on('keyup', function() {

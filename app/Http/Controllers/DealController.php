@@ -75,15 +75,27 @@ class DealController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'customer_id' => 'required|exists:customers,id',
+            'customer_id' => 'required',
             'expected_value' => 'nullable|numeric',
         ]);
+
+        $customerId = $request->customer_id;
+        if (!is_numeric($customerId) || !\App\Models\Customer::where('id', $customerId)->exists()) {
+            $customer = \App\Models\Customer::create([
+                'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                'name' => $customerId,
+                'wa_number' => 'NA_' . substr(uniqid(), -10),
+                'assigned_user_id' => auth()->id(),
+            ]);
+            $customerId = $customer->id;
+        }
 
         $defaultStage = DealStage::orderBy('sort_order')->first();
 
         $deal = Deal::create([
+            'uuid' => (string) \Illuminate\Support\Str::uuid(),
             'title' => $request->title,
-            'customer_id' => $request->customer_id,
+            'customer_id' => $customerId,
             'deal_stage_id' => $request->deal_stage_id ?? $defaultStage->id,
             'expected_value' => $request->expected_value ?? 0,
             'assigned_user_id' => $request->assigned_user_id ?? auth()->id(),
@@ -132,6 +144,35 @@ class DealController extends Controller
         return response()->json(['success' => true, 'message' => 'Tahapan diperbarui']);
     }
 
+    public function updateValue(Request $request)
+    {
+        $request->validate([
+            'deal_id' => 'required|exists:deals,id',
+            'expected_value' => 'required|numeric',
+        ]);
+
+        $deal = Deal::findOrFail($request->deal_id);
+        $oldValue = $deal->expected_value;
+        $newValue = $request->expected_value;
+
+        if ($oldValue == $newValue) {
+            return response()->json(['success' => true]);
+        }
+
+        $deal->update([
+            'expected_value' => $newValue,
+        ]);
+
+        DealActivity::create([
+            'deal_id' => $deal->id,
+            'activity_type' => 'system',
+            'description' => "Mengubah nilai dari <strong>Rp " . number_format($oldValue) . "</strong> ke <strong>Rp " . number_format($newValue) . "</strong>",
+            'created_by' => auth()->id(),
+        ]);
+
+        return response()->json(['success' => true, 'message' => 'Nilai diperbarui']);
+    }
+
     public function detail($uuid)
     {
         $deal = Deal::with(['customer', 'stage', 'assignedUser', 'activities.creator'])->where('uuid', $uuid)->firstOrFail();
@@ -143,6 +184,10 @@ class DealController extends Controller
 
         $stages = DealStage::orderBy('sort_order')->get();
         $users = User::all();
+
+        if (request()->ajax()) {
+            return view('deals._detail_offcanvas', compact('deal', 'stages', 'users'));
+        }
 
         return view('deals.detail', compact('deal', 'stages', 'users'));
     }
@@ -187,6 +232,10 @@ class DealController extends Controller
             'file_data' => $fileData,
             'created_by' => auth()->id(),
         ]);
+
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Aktivitas berhasil ditambahkan']);
+        }
 
         return back()->with('success', 'Aktivitas berhasil ditambahkan');
     }

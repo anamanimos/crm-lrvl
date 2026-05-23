@@ -136,6 +136,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/board-data', [DealController::class, 'getBoardData'])->name('board-data');
         Route::post('/store', [DealController::class, 'store'])->name('store');
         Route::post('/update-stage', [DealController::class, 'updateStage'])->name('update-stage');
+        Route::post('/update-value', [DealController::class, 'updateValue'])->name('update-value');
         Route::get('/detail/{uuid}', [DealController::class, 'detail'])->name('detail');
         Route::post('/{id}/activity', [DealController::class, 'addActivity'])->name('activity');
         Route::post('/{id}/archive', [DealController::class, 'archive'])->name('archive');
