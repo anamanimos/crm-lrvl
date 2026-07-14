@@ -73,7 +73,8 @@ class OidcController extends Controller
                 'exception' => $e,
                 'request' => request()->all()
             ]);
-            return redirect()->route('login')->with('error', 'Authentication failed: ' . $e->getMessage());
+            // return redirect()->route('login')->with('error', 'Authentication failed: ' . $e->getMessage());
+            dd('SSO Login Failed', $e->getMessage(), $e->getTraceAsString(), request()->all());
         }
     }
 
