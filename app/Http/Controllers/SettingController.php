@@ -599,7 +599,7 @@ class SettingController extends Controller
 
     private function waRequest($endpoint, $method = 'GET', $data = null)
     {
-        $baseUrl = rtrim(Setting::get('gowa_api_url', 'https://wag.anam.ch'), '/');
+        $baseUrl = rtrim(Setting::get('gowa_api_url', 'https://wag.nams.my.id'), '/');
         $username = Setting::get('gowa_username', '');
         $password = Setting::get('gowa_password', '');
         $deviceId = Setting::get('gowa_device_id', 'crm-session');

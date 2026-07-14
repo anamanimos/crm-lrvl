@@ -8,8 +8,8 @@
                 <div class="mb-5 mt-5 fv-row">
                     <label class="form-label fw-bold">API URL</label>
                     <input type="text" name="gowa_api_url" class="form-control" 
-                           placeholder="https://wag.anam.ch" 
-                           value="{{ $settings['gowa_api_url'] ?? 'https://wag.anam.ch' }}">
+                           placeholder="https://wag.nams.my.id" 
+                           value="{{ $settings['gowa_api_url'] ?? 'https://wag.nams.my.id' }}">
                 </div>
                 <div class="row">
                     <div class="col-md-6 mb-5 fv-row">

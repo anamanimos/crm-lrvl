@@ -467,7 +467,7 @@ class WebhookController extends Controller
         
         if (strpos($path, 'http') === 0) return $path;
         
-        $baseUrl = rtrim(Setting::get('gowa_api_url', 'https://wag.anam.ch'), '/');
+        $baseUrl = rtrim(Setting::get('gowa_api_url', 'https://wag.nams.my.id'), '/');
         return $baseUrl . '/' . ltrim($path, '/');
     }
 

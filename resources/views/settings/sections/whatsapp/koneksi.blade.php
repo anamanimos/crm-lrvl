@@ -54,7 +54,7 @@
         <div class="card card-flush shadow-sm border-0 border-primary border-dashed rounded bg-light-primary">
             <div class="card-body">
                 <h2 class="mb-5 text-primary"><i class="ki-outline ki-information-4 text-primary fs-2 me-2"></i> Petunjuk Koneksi</h2>
-                <p class="fs-6 text-gray-700">Modul ini menangani koneksi perangkat Anda ke Gateway WhatsApp Go-WA yang berjalan di <code>{{ \App\Models\Setting::get('gowa_api_url', 'https://wag.anam.ch') }}</code>.</p>
+                <p class="fs-6 text-gray-700">Modul ini menangani koneksi perangkat Anda ke Gateway WhatsApp Go-WA yang berjalan di <code>{{ \App\Models\Setting::get('gowa_api_url', 'https://wag.nams.my.id') }}</code>.</p>
                 <ul class="fs-6 text-gray-700">
                     <li><strong>Status Terkoneksi</strong>: Perangkat dapat mengirim dan menerima pesan.</li>
                     <li><strong>Status Terputus</strong>: Anda perlu menautkan ulang dengan memindai kode QR.</li>
