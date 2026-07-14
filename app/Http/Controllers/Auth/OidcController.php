@@ -12,13 +12,13 @@ class OidcController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('oidc')->stateless()->redirect();
+        return Socialite::driver('oidc')->redirect();
     }
 
     public function callback()
     {
         try {
-            $socialUser = Socialite::driver('oidc')->stateless()->user();
+            $socialUser = Socialite::driver('oidc')->user();
             
             \Illuminate\Support\Facades\Log::info('OIDC Social User Data:', [
                 'id' => $socialUser->getId(),
