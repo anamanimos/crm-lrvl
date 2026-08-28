@@ -157,6 +157,15 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/{id}', [\App\Http\Controllers\ApiKeyController::class, 'destroy'])->name('destroy');
     });
 
+    // Chat Source Rules Management (Must be before settings wildcard route)
+    Route::prefix('settings/chat-sources')->name('chat-sources.')->group(function() {
+        Route::get('/', [\App\Http\Controllers\ChatSourceRuleController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\ChatSourceRuleController::class, 'store'])->name('store');
+        Route::put('/{id}', [\App\Http\Controllers\ChatSourceRuleController::class, 'update'])->name('update');
+        Route::post('/{id}/toggle-status', [\App\Http\Controllers\ChatSourceRuleController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [\App\Http\Controllers\ChatSourceRuleController::class, 'destroy'])->name('destroy');
+    });
+
     // Settings (No /admin prefix)
     Route::name('settings.')->group(function() {
         Route::get('/settings/test/erp', [SettingController::class, 'testErp'])->name('test.erp');
