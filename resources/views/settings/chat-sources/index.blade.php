@@ -28,6 +28,10 @@
             </div>
             <!--begin::Actions-->
             <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <button type="button" class="btn btn-sm fw-bold btn-light-warning" onclick="syncUnknownCustomers()" id="btn_sync_unknown">
+                    <i class="ki-outline ki-arrows-circle fs-4 me-1"></i>
+                    Set Semua Customer Lama ke Unknown
+                </button>
                 <button type="button" class="btn btn-sm fw-bold btn-primary" onclick="openAddModal()">
                     <i class="ki-outline ki-plus fs-4 me-1"></i>
                     Tambah Aturan
@@ -445,6 +449,61 @@
                                 timer: 2000
                             });
                         }
+                    });
+                }
+            });
+        }
+
+        function syncUnknownCustomers() {
+            Swal.fire({
+                title: 'Set Customer Lama ke Unknown?',
+                text: 'Semua customer yang saat ini belum memiliki sumber atau masih WhatsApp akan diubah menjadi Unknown.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Update Sekarang',
+                cancelButtonText: 'Batal',
+                customClass: {
+                    confirmButton: 'btn btn-warning',
+                    cancelButton: 'btn btn-light'
+                }
+            }).then(result => {
+                if (result.isConfirmed) {
+                    const btn = document.getElementById('btn_sync_unknown');
+                    if (btn) btn.disabled = true;
+
+                    fetch("{{ route('chat-sources.sync-unknown') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (btn) btn.disabled = false;
+                        if (res.success) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: res.message,
+                                confirmButtonText: 'OK'
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Gagal',
+                                text: res.message || 'Gagal memperbarui data customer.'
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        if (btn) btn.disabled = false;
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Terjadi kesalahan koneksi.'
+                        });
                     });
                 }
             });

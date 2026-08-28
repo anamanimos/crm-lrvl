@@ -8,6 +8,14 @@ Artisan::command('inspire', function () {
     $this->comment(Illuminate\Foundation\Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
+Artisan::command('customers:sync-unknown', function () {
+    $count = \App\Models\Customer::whereNull('source')
+        ->orWhere('source', '')
+        ->orWhere('source', 'WhatsApp')
+        ->update(['source' => 'Unknown']);
+    $this->info("Successfully updated {$count} customers to 'Unknown'.");
+})->purpose('Update existing customer sources to Unknown');
+
 use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('wa:sync-media')->hourly();

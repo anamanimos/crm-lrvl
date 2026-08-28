@@ -148,4 +148,30 @@ class ChatSourceRuleController extends Controller
 
         return back()->with('success', 'Aturan berhasil dihapus.');
     }
+
+    public function syncUnknown(Request $request)
+    {
+        if (!auth()->user()->hasPermission('settings.view')) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Akses Ditolak'], 403);
+            }
+            abort(403, 'Akses Ditolak');
+        }
+
+        // Update all existing customers whose source is null, empty, or 'WhatsApp' to 'Unknown'
+        $updatedCount = \App\Models\Customer::whereNull('source')
+            ->orWhere('source', '')
+            ->orWhere('source', 'WhatsApp')
+            ->update(['source' => 'Unknown']);
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'updated_count' => $updatedCount,
+                'message' => "Berhasil memperbarui {$updatedCount} customer menjadi 'Unknown'."
+            ]);
+        }
+
+        return back()->with('success', "Berhasil memperbarui {$updatedCount} customer menjadi 'Unknown'.");
+    }
 }

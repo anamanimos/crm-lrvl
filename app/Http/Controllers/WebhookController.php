@@ -165,17 +165,17 @@ class WebhookController extends Controller
         $senderName = $data['pushname'] ?? $data['name'] ?? $data['sender_name'] ?? $data['from_name'] ?? null;
 
         if ($senderPhone) {
-            // Detect source from incoming message content using active rules
-            $detectedSource = null;
-            if (!$fromMe && !empty($content)) {
-                $matchedRule = \App\Models\ChatSourceRule::findMatch($content);
-                if ($matchedRule) {
-                    $detectedSource = $matchedRule->source_name;
-                }
-            }
-
             $customer = Customer::where('wa_number', $senderPhone)->first();
             if (!$customer) {
+                // Detect source from incoming message content only for new customers
+                $detectedSource = null;
+                if (!$fromMe && !empty($content)) {
+                    $matchedRule = \App\Models\ChatSourceRule::findMatch($content);
+                    if ($matchedRule) {
+                        $detectedSource = $matchedRule->source_name;
+                    }
+                }
+
                 $formattedName = $senderName ?: ('WA - ' . $senderPhone);
                 if ($senderName && !str_contains($formattedName, $senderPhone)) {
                     $formattedName = $senderName . ' - ' . $senderPhone;
@@ -183,20 +183,10 @@ class WebhookController extends Controller
                 $customer = Customer::create([
                     'wa_number' => $senderPhone,
                     'name' => $formattedName,
-                    'source' => $detectedSource ?: 'WhatsApp'
+                    'source' => $detectedSource ?: 'Unknown'
                 ]);
-            } else {
-                $updates = [];
-                if ($senderName && (empty($customer->name) || str_starts_with($customer->name, 'WA - '))) {
-                    $updates['name'] = $senderName . ' - ' . $senderPhone;
-                }
-                // If a source is detected and current customer source is empty or default 'WhatsApp'
-                if ($detectedSource && (empty($customer->source) || $customer->source === 'WhatsApp')) {
-                    $updates['source'] = $detectedSource;
-                }
-                if (!empty($updates)) {
-                    $customer->update($updates);
-                }
+            } elseif ($senderName && (empty($customer->name) || str_starts_with($customer->name, 'WA - '))) {
+                $customer->update(['name' => $senderName . ' - ' . $senderPhone]);
             }
             $customerId = $customer->id;
             // Only update last_chat_at for personal chats (not in group context)

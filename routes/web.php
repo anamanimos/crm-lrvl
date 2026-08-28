@@ -164,6 +164,7 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}', [\App\Http\Controllers\ChatSourceRuleController::class, 'update'])->name('update');
         Route::post('/{id}/toggle-status', [\App\Http\Controllers\ChatSourceRuleController::class, 'toggleStatus'])->name('toggle-status');
         Route::delete('/{id}', [\App\Http\Controllers\ChatSourceRuleController::class, 'destroy'])->name('destroy');
+        Route::match(['GET', 'POST'], '/sync-unknown', [\App\Http\Controllers\ChatSourceRuleController::class, 'syncUnknown'])->name('sync-unknown');
     });
 
     // Settings (No /admin prefix)
