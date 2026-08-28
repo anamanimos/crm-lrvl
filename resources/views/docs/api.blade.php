@@ -164,7 +164,60 @@
                                         <span class="badge badge-light-primary fw-bold fs-4 py-2 px-4 me-4">GET</span>
                                         <h3 class="text-gray-800 fw-bold fs-3 m-0">/customers/{id}</h3>
                                     </div>
-                                    <p class="text-gray-600 mb-6">Mengambil detail satu customer berdasarkan ID atau nomor WhatsApp.</p>
+                                    <p class="text-gray-600 mb-6">Mengambil detail lengkap satu customer berdasarkan ID atau nomor WhatsApp.</p>
+                                    
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Path Parameters</h4>
+                                    <div class="table-responsive mb-8">
+                                        <table class="table table-row-bordered table-row-gray-300 align-middle">
+                                            <thead>
+                                                <tr class="fw-bold text-muted bg-light">
+                                                    <th class="ps-4 rounded-start">Param</th>
+                                                    <th>Type</th>
+                                                    <th>Required</th>
+                                                    <th class="rounded-end">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="ps-4"><code>id</code></td>
+                                                    <td><span class="badge badge-light">int | string</span></td>
+                                                    <td><span class="text-danger fw-bold">Yes</span></td>
+                                                    <td>ID Customer (cth: <code>1023</code>) atau nomor WhatsApp (cth: <code>628113780819</code>)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
+  "success": true,
+  "data": {
+    "id": 1023,
+    "name": "Budi Santoso",
+    "whatsapp": "628113780819",
+    "email": "budi@example.com",
+    "source": "Instagram",
+    "address": "Jl. Sudirman No. 45, Jakarta",
+    "notes": "Tertarik paket premium",
+    "company": {
+      "id": 12,
+      "name": "PT Maju Bersama"
+    },
+    "assigned_user": {
+      "id": 3,
+      "name": "Sales Admin"
+    },
+    "labels": [
+      {
+        "id": 1,
+        "name": "Hot Lead",
+        "color": "#e74c3c"
+      }
+    ],
+    "created_at": "2026-08-03 14:20:00",
+    "updated_at": "2026-08-28 10:15:30"
+  }
+}</code></pre>
                                 </div>
 
                                 <!-- CREATE -->

@@ -279,4 +279,54 @@ class CustomerController extends Controller
             'data' => $data,
         ]);
     }
+
+    /**
+     * Public API: Get single customer detail by ID or WhatsApp number.
+     */
+    public function apiShow(Request $request, $id)
+    {
+        $phone = format_phone($id);
+        $customer = Customer::with(['labels', 'company', 'assignedUser'])
+            ->where('id', $id)
+            ->orWhere('wa_number', $id)
+            ->orWhere('wa_number', $phone)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $customer->id,
+                'name' => $customer->name,
+                'whatsapp' => $customer->wa_number,
+                'email' => $customer->email,
+                'source' => $customer->source ?: 'Unknown',
+                'address' => $customer->address,
+                'notes' => $customer->notes,
+                'company' => $customer->company ? [
+                    'id' => $customer->company->id,
+                    'name' => $customer->company->name,
+                ] : null,
+                'assigned_user' => $customer->assignedUser ? [
+                    'id' => $customer->assignedUser->id,
+                    'name' => $customer->assignedUser->name,
+                ] : null,
+                'labels' => $customer->labels->map(function ($label) {
+                    return [
+                        'id' => $label->id,
+                        'name' => $label->name,
+                        'color' => $label->color,
+                    ];
+                }),
+                'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : null,
+                'updated_at' => $customer->updated_at ? $customer->updated_at->format('Y-m-d H:i:s') : null,
+            ]
+        ]);
+    }
 }
