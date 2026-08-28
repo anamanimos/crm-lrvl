@@ -10,11 +10,66 @@
     <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_customers_table">
         <thead>
             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                <th class="min-w-125px col-customer">Customer</th>
-                <th class="min-w-100px col-company">Perusahaan</th>
-                <th class="min-w-125px col-whatsapp">Nomor WA</th>
-                <th class="min-w-100px col-source">Source</th>
-                <th class="min-w-100px col-last-chat">Terakhir Chat</th>
+                <th class="min-w-125px col-customer cursor-pointer table-sortable-th user-select-none" data-sort="name" title="Klik untuk mengurutkan nama">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Customer</span>
+                        <span class="sort-icon-container ms-1">
+                            @if(request('sort_by') === 'name' || request('sort_by') === 'customer')
+                                <i class="ki-outline ki-arrow-{{ request('sort_order', 'desc') === 'asc' ? 'up' : 'down' }} fs-5 text-primary"></i>
+                            @else
+                                <i class="ki-outline ki-sort fs-6 text-muted opacity-50"></i>
+                            @endif
+                        </span>
+                    </div>
+                </th>
+                <th class="min-w-100px col-company cursor-pointer table-sortable-th user-select-none" data-sort="company" title="Klik untuk mengurutkan perusahaan">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Perusahaan</span>
+                        <span class="sort-icon-container ms-1">
+                            @if(request('sort_by') === 'company')
+                                <i class="ki-outline ki-arrow-{{ request('sort_order', 'desc') === 'asc' ? 'up' : 'down' }} fs-5 text-primary"></i>
+                            @else
+                                <i class="ki-outline ki-sort fs-6 text-muted opacity-50"></i>
+                            @endif
+                        </span>
+                    </div>
+                </th>
+                <th class="min-w-125px col-whatsapp cursor-pointer table-sortable-th user-select-none" data-sort="wa_number" title="Klik untuk mengurutkan nomor WA">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Nomor WA</span>
+                        <span class="sort-icon-container ms-1">
+                            @if(request('sort_by') === 'wa_number' || request('sort_by') === 'whatsapp')
+                                <i class="ki-outline ki-arrow-{{ request('sort_order', 'desc') === 'asc' ? 'up' : 'down' }} fs-5 text-primary"></i>
+                            @else
+                                <i class="ki-outline ki-sort fs-6 text-muted opacity-50"></i>
+                            @endif
+                        </span>
+                    </div>
+                </th>
+                <th class="min-w-100px col-source cursor-pointer table-sortable-th user-select-none" data-sort="source" title="Klik untuk mengurutkan sumber">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Source</span>
+                        <span class="sort-icon-container ms-1">
+                            @if(request('sort_by') === 'source')
+                                <i class="ki-outline ki-arrow-{{ request('sort_order', 'desc') === 'asc' ? 'up' : 'down' }} fs-5 text-primary"></i>
+                            @else
+                                <i class="ki-outline ki-sort fs-6 text-muted opacity-50"></i>
+                            @endif
+                        </span>
+                    </div>
+                </th>
+                <th class="min-w-100px col-last-chat cursor-pointer table-sortable-th user-select-none" data-sort="last_chat_at" title="Klik untuk mengurutkan waktu chat">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <span>Terakhir Chat</span>
+                        <span class="sort-icon-container ms-1">
+                            @if(request('sort_by') === 'last_chat_at' || request('sort_by') === 'last_chat')
+                                <i class="ki-outline ki-arrow-{{ request('sort_order', 'desc') === 'asc' ? 'up' : 'down' }} fs-5 text-primary"></i>
+                            @else
+                                <i class="ki-outline ki-sort fs-6 text-muted opacity-50"></i>
+                            @endif
+                        </span>
+                    </div>
+                </th>
                 <th class="text-end min-w-100px col-action">Aksi</th>
             </tr>
         </thead>

@@ -360,6 +360,8 @@
         (function() {
             let searchTimeout = null;
             let currentRequest = null;
+            let currentSortBy = '{{ request('sort_by', '') }}';
+            let currentSortOrder = '{{ request('sort_order', 'desc') }}';
 
             // Elements
             const searchInput = document.getElementById('filter-search');
@@ -429,8 +431,14 @@
                 if (modalLabel && modalLabel.value) params.set('label', modalLabel.value);
                 if (modalSource && modalSource.value) params.set('source', modalSource.value);
                 if (modalArchive && modalArchive.value !== '' && modalArchive.value !== '0') params.set('archive', modalArchive.value);
-                if (modalSort && modalSort.value && modalSort.value !== 'latest') params.set('sort', modalSort.value);
                 if (perPageSelect && perPageSelect.value && perPageSelect.value !== '20') params.set('per_page', perPageSelect.value);
+
+                if (currentSortBy) {
+                    params.set('sort_by', currentSortBy);
+                    params.set('sort_order', currentSortOrder);
+                } else if (modalSort && modalSort.value && modalSort.value !== 'latest') {
+                    params.set('sort', modalSort.value);
+                }
 
                 return params;
             }
@@ -466,7 +474,26 @@
                     </span>`;
                 }
 
-                if (modalSort && modalSort.value && modalSort.value !== 'latest') {
+                if (currentSortBy) {
+                    count++;
+                    const sortLabels = {
+                        'name': 'Nama',
+                        'customer': 'Customer',
+                        'company': 'Perusahaan',
+                        'wa_number': 'Nomor WA',
+                        'whatsapp': 'Nomor WA',
+                        'source': 'Source',
+                        'last_chat_at': 'Terakhir Chat',
+                        'created_at': 'Tanggal Dibuat',
+                        'id': 'ID'
+                    };
+                    const label = sortLabels[currentSortBy] || currentSortBy;
+                    const dir = currentSortOrder === 'asc' ? 'A-Z' : 'Z-A';
+                    pillsHtml += `<span class="badge badge-light-secondary fw-semibold fs-8 py-2 px-3 text-gray-700">
+                        Urut: ${label} (${dir})
+                        <i class="ki-outline ki-cross fs-7 ms-1 cursor-pointer remove-filter" data-filter="sort"></i>
+                    </span>`;
+                } else if (modalSort && modalSort.value && modalSort.value !== 'latest') {
                     count++;
                     const sortText = modalSort.options[modalSort.selectedIndex].text;
                     pillsHtml += `<span class="badge badge-light-secondary fw-semibold fs-8 py-2 px-3 text-gray-700">
@@ -557,6 +584,28 @@
                 });
             }
 
+            // Header column sorting click handler
+            $(document).on('click', '.table-sortable-th', function() {
+                const col = $(this).data('sort');
+                if (!col) return;
+
+                if (currentSortBy === col) {
+                    currentSortOrder = (currentSortOrder === 'asc' ? 'desc' : 'asc');
+                } else {
+                    currentSortBy = col;
+                    currentSortOrder = (col === 'last_chat_at' ? 'desc' : 'asc');
+                }
+
+                // Sync modal sort dropdown if matching
+                if (modalSort) {
+                    if (currentSortBy === 'name') modalSort.value = currentSortOrder === 'asc' ? 'name_asc' : 'name_desc';
+                    else if (currentSortBy === 'last_chat_at') modalSort.value = 'last_chat';
+                    else modalSort.value = '';
+                }
+
+                loadCustomers();
+            });
+
             // Search input live typing (debounced)
             if (searchInput) {
                 searchInput.addEventListener('input', function() {
@@ -582,6 +631,13 @@
                     if (modalInstance) {
                         modalInstance.hide();
                     }
+                    if (modalSort) {
+                        if (modalSort.value === 'latest') { currentSortBy = 'id'; currentSortOrder = 'desc'; }
+                        else if (modalSort.value === 'oldest') { currentSortBy = 'id'; currentSortOrder = 'asc'; }
+                        else if (modalSort.value === 'name_asc') { currentSortBy = 'name'; currentSortOrder = 'asc'; }
+                        else if (modalSort.value === 'name_desc') { currentSortBy = 'name'; currentSortOrder = 'desc'; }
+                        else if (modalSort.value === 'last_chat') { currentSortBy = 'last_chat_at'; currentSortOrder = 'desc'; }
+                    }
                     loadCustomers();
                 });
             }
@@ -593,6 +649,8 @@
                     if (modalSource) modalSource.value = '';
                     if (modalArchive) modalArchive.value = '0';
                     if (modalSort) modalSort.value = 'latest';
+                    currentSortBy = '';
+                    currentSortOrder = 'desc';
                     
                     const modalEl = document.getElementById('kt_modal_customer_filter');
                     const modalInstance = bootstrap.Modal.getInstance(modalEl);
@@ -612,6 +670,8 @@
                     if (modalArchive) modalArchive.value = '0';
                     if (modalSort) modalSort.value = 'latest';
                     if (perPageSelect) perPageSelect.value = '20';
+                    currentSortBy = '';
+                    currentSortOrder = 'desc';
                     loadCustomers();
                 });
             }
@@ -622,7 +682,11 @@
                 if (filterType === 'label' && modalLabel) modalLabel.value = '';
                 if (filterType === 'source' && modalSource) modalSource.value = '';
                 if (filterType === 'archive' && modalArchive) modalArchive.value = '0';
-                if (filterType === 'sort' && modalSort) modalSort.value = 'latest';
+                if (filterType === 'sort') {
+                    currentSortBy = '';
+                    currentSortOrder = 'desc';
+                    if (modalSort) modalSort.value = 'latest';
+                }
                 loadCustomers();
             });
 

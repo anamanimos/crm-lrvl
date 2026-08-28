@@ -49,24 +49,69 @@ class CustomerController extends Controller
             $query->where('is_archived', 0);
         }
 
-        $sort = $request->input('sort', 'latest');
-        switch ($sort) {
-            case 'oldest':
-                $query->oldest('id');
-                break;
-            case 'name_asc':
-                $query->orderBy('name', 'asc');
-                break;
-            case 'name_desc':
-                $query->orderBy('name', 'desc');
-                break;
-            case 'last_chat':
-                $query->orderByDesc('last_chat_at');
-                break;
-            case 'latest':
-            default:
-                $query->latest('id');
-                break;
+        $sortBy = $request->input('sort_by');
+        $sortOrder = strtolower($request->input('sort_order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        if ($sortBy) {
+            switch ($sortBy) {
+                case 'name':
+                case 'customer':
+                    $query->orderBy('name', $sortOrder);
+                    break;
+                case 'company':
+                    $query->leftJoin('companies', 'customers.company_id', '=', 'companies.id')
+                          ->orderBy('companies.name', $sortOrder)
+                          ->select('customers.*');
+                    break;
+                case 'wa_number':
+                case 'whatsapp':
+                    $query->orderBy('wa_number', $sortOrder);
+                    break;
+                case 'source':
+                    $query->orderBy('source', $sortOrder);
+                    break;
+                case 'last_chat_at':
+                case 'last_chat':
+                    $query->orderBy('last_chat_at', $sortOrder);
+                    break;
+                case 'created_at':
+                case 'id':
+                    $query->orderBy('customers.id', $sortOrder);
+                    break;
+                default:
+                    $query->orderBy('customers.id', $sortOrder);
+                    break;
+            }
+        } else {
+            $sort = $request->input('sort', 'latest');
+            switch ($sort) {
+                case 'oldest':
+                    $query->oldest('customers.id');
+                    $sortBy = 'created_at';
+                    $sortOrder = 'asc';
+                    break;
+                case 'name_asc':
+                    $query->orderBy('name', 'asc');
+                    $sortBy = 'name';
+                    $sortOrder = 'asc';
+                    break;
+                case 'name_desc':
+                    $query->orderBy('name', 'desc');
+                    $sortBy = 'name';
+                    $sortOrder = 'desc';
+                    break;
+                case 'last_chat':
+                    $query->orderByDesc('last_chat_at');
+                    $sortBy = 'last_chat_at';
+                    $sortOrder = 'desc';
+                    break;
+                case 'latest':
+                default:
+                    $query->latest('customers.id');
+                    $sortBy = 'created_at';
+                    $sortOrder = 'desc';
+                    break;
+            }
         }
 
         $perPage = (int) $request->input('per_page', 20);
