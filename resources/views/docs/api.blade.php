@@ -47,6 +47,9 @@
                                 <a href="#create-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Create Customer</a>
                                 <a href="#update-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Update Customer</a>
                                 <div class="separator my-4"></div>
+                                <div class="px-3 text-muted fw-bold fs-8 text-uppercase mb-2">Sources</div>
+                                <a href="#list-sources" class="nav-link text-gray-600 text-hover-primary fs-7">List Sources</a>
+                                <div class="separator my-4"></div>
                                 <div class="px-3 text-muted fw-bold fs-8 text-uppercase mb-2">Reports</div>
                                 <a href="#new-chatters" class="nav-link text-gray-600 text-hover-primary fs-7">New Chatters Report</a>
                             </nav>
@@ -417,6 +420,56 @@
     "created_at": "2026-08-03 14:20:00",
     "updated_at": "2026-08-28 17:05:00"
   }
+}</code></pre>
+                                </div>
+                            </section>
+
+                            <div class="separator separator-dashed my-10"></div>
+
+                            <!-- SOURCES -->
+                            <section id="sources">
+                                <h2 class="text-primary fw-bold fs-1 mb-10">Sources Resource</h2>
+
+                                <!-- LIST SOURCES -->
+                                <div id="list-sources" class="mb-15">
+                                    <div class="d-flex align-items-center mb-5">
+                                        <span class="badge badge-light-primary fw-bold fs-4 py-2 px-4 me-4">GET</span>
+                                        <h3 class="text-gray-800 fw-bold fs-3 m-0">/sources</h3>
+                                    </div>
+                                    <p class="text-gray-600 mb-6">Mengambil daftar seluruh sumber (source) customer yang tersedia dalam sistem beserta total jumlah customer pada masing-masing sumber.</p>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
+  "success": true,
+  "data": [
+    {
+      "name": "Unknown",
+      "total_customers": 1448
+    },
+    {
+      "name": "Instagram",
+      "total_customers": 120
+    },
+    {
+      "name": "TikTok",
+      "total_customers": 85
+    },
+    {
+      "name": "Website",
+      "total_customers": 45
+    },
+    {
+      "name": "Facebook Ads",
+      "total_customers": 0
+    }
+  ],
+  "sources": [
+    "Unknown",
+    "Instagram",
+    "TikTok",
+    "Website",
+    "Facebook Ads"
+  ]
 }</code></pre>
                                 </div>
                             </section>

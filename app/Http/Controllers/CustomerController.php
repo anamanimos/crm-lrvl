@@ -9,6 +9,7 @@ use App\Models\Customer;
 use App\Models\Label;
 use App\Models\Company;
 use App\Models\User;
+use App\Models\ChatSourceRule;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -600,5 +601,42 @@ class CustomerController extends Controller
                 'message' => 'Terjadi kesalahan: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Public API: List all customer sources with total counts.
+     */
+    public function apiSources(Request $request)
+    {
+        // Get customer count grouped by source
+        $customerCounts = Customer::select('source', DB::raw('count(*) as total'))
+            ->whereNotNull('source')
+            ->where('source', '!=', '')
+            ->groupBy('source')
+            ->pluck('total', 'source')
+            ->toArray();
+
+        // Get defined sources from ChatSourceRule and default list
+        $ruleSources = ChatSourceRule::pluck('source_name')->toArray();
+        $defaultSources = ['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'];
+
+        $allSourceNames = collect(array_keys($customerCounts))
+            ->merge($ruleSources)
+            ->merge($defaultSources)
+            ->unique()
+            ->values();
+
+        $data = $allSourceNames->map(function ($name) use ($customerCounts) {
+            return [
+                'name' => $name,
+                'total_customers' => $customerCounts[$name] ?? 0,
+            ];
+        })->sortByDesc('total_customers')->values();
+
+        return response()->json([
+            'success' => true,
+            'data' => $data,
+            'sources' => $data->pluck('name')->values(),
+        ]);
     }
 }

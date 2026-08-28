@@ -234,5 +234,7 @@ Route::prefix('api')->middleware('api.key')->group(function () {
     Route::get('/customers/{id}', [CustomerController::class, 'apiShow']);
     Route::match(['PUT', 'PATCH', 'POST'], '/customers/{id}', [CustomerController::class, 'apiUpdate']);
     Route::post('/customers/{id}/update', [CustomerController::class, 'apiUpdate']);
+    Route::get('/sources', [CustomerController::class, 'apiSources']);
+    Route::get('/chat-sources', [CustomerController::class, 'apiSources']);
     Route::get('/reports/new-chatters', [ReportController::class, 'apiNewChatters']);
 });
