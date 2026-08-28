@@ -29,7 +29,6 @@ class CustomerController extends Controller
                   ->orWhere('wa_number', 'like', "%$search%")
                   ->orWhere('email', 'like', "%$search%");
             });
-
         }
 
         if ($request->filled('label')) {
@@ -38,14 +37,28 @@ class CustomerController extends Controller
             });
         }
 
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+
         if ($request->filled('archive')) {
             $query->where('is_archived', $request->archive);
         } else {
             $query->where('is_archived', 0);
         }
 
-        $customers = $query->latest()->paginate(20)->withQueryString();
+        $perPage = (int) $request->input('per_page', 20);
+        if (!in_array($perPage, [10, 20, 50, 100])) {
+            $perPage = 20;
+        }
+
+        $customers = $query->latest()->paginate($perPage)->withQueryString();
         $labels = Label::withCount('customers')->get();
+
+        $sources = ChatSourceRule::pluck('source_name')
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->unique()
+            ->values();
 
         // Stats
         $stats = [
@@ -55,7 +68,16 @@ class CustomerController extends Controller
             'labels' => $labels
         ];
 
-        return view('customers.index', compact('customers', 'labels', 'stats'));
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'html' => view('customers._table', compact('customers'))->render(),
+                'total' => $customers->total(),
+                'first_item' => $customers->firstItem() ?? 0,
+                'last_item' => $customers->lastItem() ?? 0,
+            ]);
+        }
+
+        return view('customers.index', compact('customers', 'labels', 'sources', 'stats'));
     }
 
     public function create()

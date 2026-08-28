@@ -66,11 +66,11 @@
                         <div class="card-header pt-5">
                             <h3 class="card-title align-items-start flex-column">
                                 <span class="card-label fw-bold text-gray-800">Ringkasan</span>
-                                <span class="text-gray-400 mt-1 fw-semibold fs-7">Statistik customer saat ini</span>
+                                <span class="text-gray-400 mt-1 fw-semibold fs-7">Klik untuk filter cepat</span>
                             </h3>
                         </div>
                         <div class="card-body pt-0">
-                            <div class="d-flex flex-stack mb-5">
+                            <div class="d-flex flex-stack mb-5 cursor-pointer p-2 rounded hover-elevate-up filter-quick-status" data-status="0" title="Filter Customer Aktif">
                                 <div class="d-flex align-items-center me-2">
                                     <div class="symbol symbol-40px me-3">
                                         <span class="symbol-label bg-light-primary">
@@ -85,7 +85,7 @@
                                 <span class="text-gray-800 fw-bold fs-4">{{ number_format($stats['active']) }}</span>
                             </div>
 
-                            <div class="d-flex flex-stack mb-5">
+                            <div class="d-flex flex-stack mb-5 cursor-pointer p-2 rounded hover-elevate-up filter-quick-status" data-status="1" title="Filter Customer Arsip">
                                 <div class="d-flex align-items-center me-2">
                                     <div class="symbol symbol-40px me-3">
                                         <span class="symbol-label bg-light-warning">
@@ -102,7 +102,7 @@
 
                             <div class="separator separator-dashed my-5"></div>
 
-                            <div class="d-flex flex-stack">
+                            <div class="d-flex flex-stack p-2">
                                 <div class="d-flex align-items-center me-2">
                                     <div class="symbol symbol-40px me-3">
                                         <span class="symbol-label bg-light-success">
@@ -125,11 +125,12 @@
                         <div class="card-header pt-5">
                             <h3 class="card-title align-items-start flex-column">
                                 <span class="card-label fw-bold text-gray-800">Distribusi Label</span>
+                                <span class="text-gray-400 mt-1 fw-semibold fs-7">Klik label untuk filter</span>
                             </h3>
                         </div>
                         <div class="card-body pt-0">
                             @foreach($stats['labels'] as $label)
-                            <div class="d-flex flex-stack mb-4">
+                            <div class="d-flex flex-stack mb-3 p-2 rounded cursor-pointer hover-elevate-up filter-quick-label" data-label-id="{{ $label->id }}" title="Filter Label {{ $label->name }}">
                                 <div class="d-flex align-items-center me-2">
                                     <div class="symbol symbol-15px me-3">
                                         <span class="symbol-label" style="background-color: {{ $label->color }}"></span>
@@ -152,183 +153,74 @@
                 <div class="col-xl-9">
                     <!--begin::Card-->
                     <div class="card card-flush">
-                <!--begin::Card header-->
-                <div class="card-header border-0 pt-6">
-                    <!--begin::Card title-->
-                    <div class="card-title">
-                        <form action="{{ route('admin.customers.index') }}" method="GET" class="d-flex align-items-center position-relative my-1">
-                            <i class="ki-outline ki-magnifier fs-3 position-absolute ms-5"></i>
-                            <input type="text" name="search" 
-                                   class="form-control form-control-solid w-250px ps-13" 
-                                   placeholder="Cari customer..." 
-                                   value="{{ request('search') }}" />
-                        </form>
-                    </div>
-                    <!--end::Card title-->
-                    
-                    <!--begin::Card toolbar-->
-                    <div class="card-toolbar">
-                        <div class="d-flex justify-content-end gap-3">
-                            <form action="{{ route('admin.customers.index') }}" method="GET" class="d-flex gap-3">
-                                @if(request('search')) <input type="hidden" name="search" value="{{ request('search') }}"> @endif
-                                
-                                <select name="per_page" class="form-select form-select-solid form-select-sm w-75px" onchange="this.form.submit()">
-                                    @foreach ([10, 20, 50, 100] as $limit)
-                                    <option value="{{ $limit }}" {{ (request('per_page', 20) == $limit) ? 'selected' : '' }}>
-                                        {{ $limit }}
-                                    </option>
-                                    @endforeach
-                                </select>
+                        <!--begin::Card header-->
+                        <div class="card-header border-0 pt-6">
+                            <!--begin::Card title (Search)-->
+                            <div class="card-title">
+                                <div class="d-flex align-items-center position-relative my-1">
+                                    <i class="ki-outline ki-magnifier fs-3 position-absolute ms-4 text-gray-500"></i>
+                                    <input type="text" id="filter-search" 
+                                           class="form-control form-control-solid w-250px ps-12 pe-10" 
+                                           placeholder="Cari nama, WA, email..." 
+                                           value="{{ request('search') }}" />
+                                    <span id="search-spinner" class="spinner-border spinner-border-sm text-primary position-absolute end-0 me-3 d-none"></span>
+                                </div>
+                            </div>
+                            <!--end::Card title-->
+                            
+                            <!--begin::Card toolbar (Filters)-->
+                            <div class="card-toolbar">
+                                <div class="d-flex flex-wrap align-items-center gap-2">
+                                    <!-- Label Filter -->
+                                    <select id="filter-label" class="form-select form-select-solid form-select-sm w-140px" title="Filter Label">
+                                        <option value="">Semua Label</option>
+                                        @foreach ($labels as $label)
+                                        <option value="{{ $label->id }}" {{ request('label') == $label->id ? 'selected' : '' }}>
+                                            {{ $label->name }}
+                                        </option>
+                                        @endforeach
+                                    </select>
 
-                                <select name="label" class="form-select form-select-solid w-150px" onchange="this.form.submit()">
-                                    <option value="">Semua Label</option>
-                                    @foreach ($labels as $label)
-                                    <option value="{{ $label->id }}" {{ (request('label') == $label->id) ? 'selected' : '' }}>
-                                        {{ $label->name }}
-                                    </option>
-                                    @endforeach
-                                </select>
-                            </form>
+                                    <!-- Source Filter -->
+                                    <select id="filter-source" class="form-select form-select-solid form-select-sm w-130px" title="Filter Sumber">
+                                        <option value="">Semua Sumber</option>
+                                        @foreach ($sources as $source)
+                                        <option value="{{ $source }}" {{ request('source') == $source ? 'selected' : '' }}>
+                                            {{ $source }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+
+                                    <!-- Status Filter -->
+                                    <select id="filter-archive" class="form-select form-select-solid form-select-sm w-110px" title="Status Customer">
+                                        <option value="0" {{ request('archive', '0') === '0' ? 'selected' : '' }}>Aktif</option>
+                                        <option value="1" {{ request('archive') === '1' ? 'selected' : '' }}>Arsip</option>
+                                    </select>
+
+                                    <!-- Limit Per Page -->
+                                    <select id="filter-per-page" class="form-select form-select-solid form-select-sm w-70px" title="Data per Halaman">
+                                        @foreach ([10, 20, 50, 100] as $limit)
+                                        <option value="{{ $limit }}" {{ request('per_page', 20) == $limit ? 'selected' : '' }}>
+                                            {{ $limit }}
+                                        </option>
+                                        @endforeach
+                                    </select>
+
+                                    <!-- Reset Filters Button -->
+                                    <button type="button" id="btn-reset-filters" class="btn btn-sm btn-icon btn-light btn-active-light-primary" title="Reset Semua Filter">
+                                        <i class="ki-outline ki-arrows-circle fs-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!--end::Card toolbar-->
                         </div>
-                    </div>
-                    <!--end::Card toolbar-->
-                </div>
-                <!--end::Card header-->
-                
-                <!--begin::Card body-->
-                <div class="card-body py-4">
-                    <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_customers_table">
-                            <thead>
-                                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                                    <th class="min-w-125px">Customer</th>
-                                    <th class="min-w-100px">Perusahaan</th>
-                                    <th class="min-w-125px">Nomor WA</th>
-                                    <th class="min-w-100px">Label</th>
-                                    <th class="min-w-100px">Terakhir Chat</th>
-                                    <th class="text-end min-w-100px">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 fw-semibold">
-                                @forelse ($customers as $customer)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <div class="symbol symbol-circle symbol-40px me-3">
-                                                <div class="symbol-label fs-5 fw-semibold bg-light-primary text-primary">
-                                                    {{ generate_initials($customer->name ?: $customer->wa_number) }}
-                                                </div>
-                                            </div>
-                                            <div class="d-flex flex-column">
-                                                <a href="{{ route('admin.customers.show', $customer->id) }}" 
-                                                   class="text-gray-800 text-hover-primary fw-bold">
-                                                    {{ $customer->name ?: 'Tanpa Nama' }}
-                                                </a>
-                                                <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
-                                                    @if ($customer->assignedUser)
-                                                    <span class="text-muted fs-7">
-                                                        <i class="ki-outline ki-user fs-7"></i> {{ $customer->assignedUser->name }}
-                                                    </span>
-                                                    @endif
-                                                    @if ($customer->source)
-                                                    <span class="badge badge-light-info fs-8 py-0 px-2" title="Sumber Customer">
-                                                        <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $customer->source }}
-                                                    </span>
-                                                    @endif
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        @if ($customer->company)
-                                        <span class="text-gray-800 fw-bold">{{ $customer->company->name }}</span>
-                                        @else
-                                        <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        <a href="https://wa.me/{{ $customer->wa_number }}" target="_blank" 
-                                           class="text-gray-600 text-hover-primary">
-                                            {{ format_phone_display($customer->wa_number) }}
-                                        </a>
-                                    </td>
-                                    <td>
-                                        @if ($customer->labels->isNotEmpty())
-                                        <div class="d-flex flex-wrap gap-1">
-                                            @foreach ($customer->labels as $label)
-                                            <span class="badge" style="background-color: {{ $label->color }}20; color: {{ $label->color }}">
-                                                {{ $label->name }}
-                                            </span>
-                                            @endforeach
-                                        </div>
-                                        @else
-                                        <span class="text-muted">-</span>
-                                        @endif
-                                    </td>
-                                    <td>
-                                        {{ time_ago($customer->last_chat_at) }}
-                                    </td>
-                                    <td class="text-end">
-                                        <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" 
-                                           data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
-                                            Aksi
-                                            <i class="ki-outline ki-down fs-5 ms-1"></i>
-                                        </a>
-                                        <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7 w-125px py-4" 
-                                             data-kt-menu="true">
-                                            <div class="menu-item px-3">
-                                                <a href="{{ url('chat?customer=' . $customer->id) }}" class="menu-link px-3">
-                                                    <i class="ki-outline ki-message-text-2 fs-5 me-2"></i> Chat
-                                                </a>
-                                            </div>
-                                            <div class="menu-item px-3">
-                                                <a href="{{ route('admin.customers.show', $customer->id) }}" class="menu-link px-3">
-                                                    <i class="ki-outline ki-eye fs-5 me-2"></i> Detail
-                                                </a>
-                                            </div>
-                                            <div class="menu-item px-3">
-                                                <a href="{{ route('admin.customers.edit', $customer->id) }}" class="menu-link px-3">
-                                                    <i class="ki-outline ki-pencil fs-5 me-2"></i> Edit
-                                                </a>
-                                            </div>
-                                            <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3 btn-archive" 
-                                                   data-id="{{ $customer->id }}" data-archived="{{ $customer->is_archived }}">
-                                                    <i class="ki-outline ki-archive fs-5 me-2"></i> {{ $customer->is_archived ? 'Pulihkan' : 'Arsip' }}
-                                                </a>
-                                            </div>
-                                            <div class="menu-item px-3">
-                                                <a href="#" class="menu-link px-3 text-danger btn-delete" 
-                                                   data-id="{{ $customer->id }}" data-name="{{ $customer->name ?: $customer->wa_number }}">
-                                                    <i class="ki-outline ki-trash fs-5 me-2"></i> Hapus
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr>
-                                    <td colspan="6" class="text-center py-10 text-muted">
-                                        Belum ada data customer
-                                    </td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <!--end::Card body-->
-                
-                <!--begin::Card footer-->
-                <div class="card-footer d-flex justify-content-between align-items-center pt-4">
-                    <div class="text-gray-600 fs-7">
-                        Showing {{ $customers->firstItem() ?? 0 }} to {{ $customers->lastItem() ?? 0 }} of {{ $customers->total() }} entries
-                    </div>
-                    <div>
-                        {{ $customers->links() }}
-                    </div>
-                </div>
-                <!--end::Card footer-->
+                        <!--end::Card header-->
+                        
+                        <!--begin::Card body (Table)-->
+                        <div class="card-body py-4" id="customer-table-container">
+                            @include('customers._table')
+                        </div>
+                        <!--end::Card body-->
                     </div>
                     <!--end::Card-->
                 </div>
@@ -347,54 +239,181 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle Delete
-            document.querySelectorAll('.btn-delete').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var id = this.getAttribute('data-id');
-                    var name = this.getAttribute('data-name');
-                    
-                    Swal.fire({
-                        title: 'Hapus Customer?',
-                        text: "Apakah Anda yakin ingin menghapus " + name + "? Tindakan ini tidak dapat dibatalkan.",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#d33',
-                        confirmButtonText: 'Ya, Hapus!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            var form = document.getElementById('action-form');
-                            form.action = "{{ url('admin/customers') }}/" + id + "/delete";
-                            form.submit();
+            let searchTimeout = null;
+            let currentRequest = null;
+
+            const searchInput = document.getElementById('filter-search');
+            const labelSelect = document.getElementById('filter-label');
+            const sourceSelect = document.getElementById('filter-source');
+            const archiveSelect = document.getElementById('filter-archive');
+            const perPageSelect = document.getElementById('filter-per-page');
+            const resetBtn = document.getElementById('btn-reset-filters');
+            const searchSpinner = document.getElementById('search-spinner');
+            const tableContainer = document.getElementById('customer-table-container');
+
+            function getFilterParams() {
+                const params = new URLSearchParams();
+                if (searchInput.value.trim()) params.set('search', searchInput.value.trim());
+                if (labelSelect.value) params.set('label', labelSelect.value);
+                if (sourceSelect.value) params.set('source', sourceSelect.value);
+                if (archiveSelect.value !== '') params.set('archive', archiveSelect.value);
+                if (perPageSelect.value) params.set('per_page', perPageSelect.value);
+                return params;
+            }
+
+            function loadCustomers(url = null) {
+                let targetUrl = url;
+                if (!targetUrl) {
+                    const params = getFilterParams();
+                    targetUrl = "{{ route('admin.customers.index') }}" + (params.toString() ? '?' + params.toString() : '');
+                }
+
+                // Show spinner & loading overlay
+                if (searchSpinner) searchSpinner.classList.remove('d-none');
+                const overlay = document.getElementById('table-loading-overlay');
+                if (overlay) {
+                    overlay.classList.remove('d-none');
+                    overlay.classList.add('d-flex');
+                }
+
+                // Abort previous pending request if any
+                if (currentRequest && currentRequest.readyState !== 4) {
+                    currentRequest.abort();
+                }
+
+                currentRequest = $.ajax({
+                    url: targetUrl,
+                    type: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        if (response.html) {
+                            tableContainer.innerHTML = response.html;
                         }
-                    });
+
+                        // Reinitialize Metronic Menus
+                        if (typeof KTMenu !== 'undefined') {
+                            KTMenu.createInstances();
+                        }
+
+                        // Update Browser History URL
+                        if (window.history && window.history.pushState) {
+                            window.history.pushState(null, '', targetUrl);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        if (status !== 'abort') {
+                            console.error('AJAX Load Error:', error);
+                        }
+                    },
+                    complete: function() {
+                        if (searchSpinner) searchSpinner.classList.add('d-none');
+                        const overlay = document.getElementById('table-loading-overlay');
+                        if (overlay) {
+                            overlay.classList.remove('d-flex');
+                            overlay.classList.add('d-none');
+                        }
+                    }
+                });
+            }
+
+            // Search input live typing (debounced)
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function() {
+                    loadCustomers();
+                }, 350);
+            });
+
+            // Filter dropdowns change
+            labelSelect.addEventListener('change', function() { loadCustomers(); });
+            sourceSelect.addEventListener('change', function() { loadCustomers(); });
+            archiveSelect.addEventListener('change', function() { loadCustomers(); });
+            perPageSelect.addEventListener('change', function() { loadCustomers(); });
+
+            // Reset filters
+            resetBtn.addEventListener('click', function() {
+                searchInput.value = '';
+                labelSelect.value = '';
+                sourceSelect.value = '';
+                archiveSelect.value = '0';
+                perPageSelect.value = '20';
+                loadCustomers();
+            });
+
+            // Quick Filters from Left Sidebar
+            document.querySelectorAll('.filter-quick-status').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const status = this.getAttribute('data-status');
+                    archiveSelect.value = status;
+                    loadCustomers();
                 });
             });
 
-            // Handle Archive
-            document.querySelectorAll('.btn-archive').forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    var id = this.getAttribute('data-id');
-                    var isArchived = this.getAttribute('data-archived') == '1';
-                    var title = isArchived ? 'Pulihkan Customer?' : 'Arsipkan Customer?';
-                    var text = isArchived ? 'Customer akan dikembalikan ke daftar aktif.' : 'Customer akan dipindahkan ke daftar arsip.';
-                    
-                    Swal.fire({
-                        title: title,
-                        text: text,
-                        icon: 'question',
-                        showCancelButton: true,
-                        confirmButtonText: 'Ya, Lanjutkan!',
-                        cancelButtonText: 'Batal'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            var form = document.getElementById('action-form');
-                            form.action = "{{ url('admin/customers') }}/" + id + "/archive";
-                            form.submit();
-                        }
-                    });
+            document.querySelectorAll('.filter-quick-label').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    const labelId = this.getAttribute('data-label-id');
+                    labelSelect.value = labelId;
+                    loadCustomers();
+                });
+            });
+
+            // AJAX Pagination click
+            $(document).on('click', '.ajax-pagination a, #customer-table-container .pagination a', function(e) {
+                e.preventDefault();
+                const href = $(this).attr('href');
+                if (href && href !== '#') {
+                    loadCustomers(href);
+                    // Smooth scroll back to table top
+                    document.getElementById('customer-table-container').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            });
+
+            // Delegated SweetAlert2 Delete
+            $(document).on('click', '.btn-delete', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                
+                Swal.fire({
+                    title: 'Hapus Customer?',
+                    text: "Apakah Anda yakin ingin menghapus " + name + "? Tindakan ini tidak dapat dibatalkan.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('action-form');
+                        form.action = "{{ url('admin/customers') }}/" + id + "/delete";
+                        form.submit();
+                    }
+                });
+            });
+
+            // Delegated SweetAlert2 Archive
+            $(document).on('click', '.btn-archive', function(e) {
+                e.preventDefault();
+                const id = $(this).data('id');
+                const isArchived = $(this).data('archived') == '1';
+                const title = isArchived ? 'Pulihkan Customer?' : 'Arsipkan Customer?';
+                const text = isArchived ? 'Customer akan dikembalikan ke daftar aktif.' : 'Customer akan dipindahkan ke daftar arsip.';
+                
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Ya, Lanjutkan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const form = document.getElementById('action-form');
+                        form.action = "{{ url('admin/customers') }}/" + id + "/archive";
+                        form.submit();
+                    }
                 });
             });
         });
