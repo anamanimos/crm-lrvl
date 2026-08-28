@@ -155,22 +155,9 @@
                     <div class="card card-flush">
                         <!--begin::Card header-->
                         <div class="card-header border-0 pt-6">
-                            <!--begin::Card title (Search)-->
-                            <div class="card-title">
-                                <div class="d-flex align-items-center position-relative my-1">
-                                    <i class="ki-outline ki-magnifier fs-3 position-absolute ms-4 text-gray-500"></i>
-                                    <input type="text" id="filter-search" 
-                                           class="form-control form-control-solid w-250px w-md-300px ps-12 pe-10" 
-                                           placeholder="Cari nama, WA, email..." 
-                                           value="{{ request('search') }}" />
-                                    <span id="search-spinner" class="spinner-border spinner-border-sm text-primary position-absolute end-0 me-3 d-none"></span>
-                                </div>
-                            </div>
-                            <!--end::Card title-->
-                            
-                            <!--begin::Card toolbar (Filter Button & Reset)-->
-                            <div class="card-toolbar">
-                                <div class="d-flex align-items-center gap-2">
+                            <!--begin::Card title (Filter Button on left, Search form on right of Filter)-->
+                            <div class="card-title w-100 w-md-auto">
+                                <div class="d-flex align-items-center flex-wrap gap-3">
                                     <!-- Filter Button (Opens Modal) -->
                                     <button type="button" class="btn btn-sm btn-light-primary fw-bold d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_customer_filter">
                                         <i class="ki-outline ki-filter fs-4 me-1"></i>
@@ -178,20 +165,32 @@
                                         <span id="active-filter-badge" class="badge badge-circle badge-primary ms-2 d-none" style="width: 18px; height: 18px; font-size: 10px;">0</span>
                                     </button>
 
-                                    <!-- Quick Reset Button -->
-                                    <button type="button" id="btn-quick-reset" class="btn btn-sm btn-icon btn-light btn-active-light-primary" title="Reset Semua Filter">
-                                        <i class="ki-outline ki-arrows-circle fs-4"></i>
-                                    </button>
+                                    <!-- Search Input Form (at the right of Filter button) -->
+                                    <div class="d-flex align-items-center position-relative my-1">
+                                        <i class="ki-outline ki-magnifier fs-3 position-absolute ms-4 text-gray-500"></i>
+                                        <input type="text" id="filter-search" 
+                                               class="form-control form-control-solid w-250px w-md-300px ps-12 pe-10" 
+                                               placeholder="Cari nama, WA, email..." 
+                                               value="{{ request('search') }}" />
+                                        <span id="search-spinner" class="spinner-border spinner-border-sm text-primary position-absolute end-0 me-3 d-none"></span>
+                                    </div>
                                 </div>
                             </div>
-                            <!--end::Card toolbar-->
+                            <!--end::Card title-->
                         </div>
                         <!--end::Card header-->
 
-                        <!--begin::Active Filter Pills-->
+                        <!--begin::Active Filter Pills with Reset Button on the Left-->
                         <div class="px-7 pt-2 pb-0" id="active-filters-container" style="display: none;">
-                            <div class="d-flex flex-wrap align-items-center gap-2" id="active-filters-pills">
-                                <!-- Dynamic pills rendered via JS -->
+                            <div class="d-flex flex-wrap align-items-center gap-2">
+                                <!-- Reset Button on the Left of Active Filters -->
+                                <button type="button" id="btn-quick-reset" class="btn btn-sm btn-light-danger fw-bold py-1 px-3 fs-8 d-flex align-items-center" title="Reset Semua Filter">
+                                    <i class="ki-outline ki-arrows-circle fs-6 me-1 text-danger"></i> Reset Filter
+                                </button>
+
+                                <div class="d-flex flex-wrap align-items-center gap-2" id="active-filters-pills">
+                                    <!-- Dynamic pills rendered via JS -->
+                                </div>
                             </div>
                         </div>
                         <!--end::Active Filter Pills-->
