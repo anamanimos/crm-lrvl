@@ -8,7 +8,7 @@
         <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
             <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                 <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-                    Aturan Sumber Chat
+                    Pengaturan Sistem
                 </h1>
                 <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
                     <li class="breadcrumb-item text-muted">
@@ -46,101 +46,109 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
 
-            <div class="card mb-5">
-                <div class="card-body">
-                    <div class="notice d-flex bg-light-primary rounded border-primary border border-dashed p-6">
-                        <i class="ki-outline ki-information-5 fs-2tx text-primary me-4"></i>
-                        <div class="d-flex flex-stack flex-grow-1">
-                            <div class="fw-semibold">
-                                <h4 class="text-gray-900 fw-bold">Cara Kerja Otomatisasi Sumber Chat</h4>
-                                <div class="fs-6 text-gray-700">
-                                    Ketika customer mengirim pesan chat pertama kali ke WhatsApp (misalnya dari link iklan/bio), sistem akan mencocokkan teks pesan dengan kata kunci di bawah ini. Jika cocok, kolom <strong>Source</strong> pada data customer akan otomatis terisi sesuai pengaturan.
+            <div class="d-flex flex-column flex-lg-row">
+                @include('settings.sidebar')
+
+                <!--begin::Main column-->
+                <div class="flex-row-fluid">
+                    <div class="card mb-5">
+                        <div class="card-body">
+                            <div class="notice d-flex bg-light-primary rounded border-primary border border-dashed p-6">
+                                <i class="ki-outline ki-information-5 fs-2tx text-primary me-4"></i>
+                                <div class="d-flex flex-stack flex-grow-1">
+                                    <div class="fw-semibold">
+                                        <h4 class="text-gray-900 fw-bold">Cara Kerja Otomatisasi Sumber Chat</h4>
+                                        <div class="fs-6 text-gray-700">
+                                            Ketika customer baru mengirim pesan chat pertama kali ke WhatsApp (misalnya dari link iklan/bio), sistem akan mencocokkan teks pesan dengan kata kunci di bawah ini. Jika cocok, kolom <strong>Source</strong> pada data customer akan otomatis terisi sesuai pengaturan.
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="card">
-                <div class="card-header border-0 pt-6">
-                    <div class="card-title">
-                        <h2>Daftar Aturan Pencocokan</h2>
+                    <div class="card">
+                        <div class="card-header border-0 pt-6">
+                            <div class="card-title">
+                                <h2>Daftar Aturan Pencocokan</h2>
+                            </div>
+                        </div>
+                        <div class="card-body py-4">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5" id="rules_table">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                                            <th>Nama Aturan</th>
+                                            <th>Kata Kunci / Pola</th>
+                                            <th>Metode</th>
+                                            <th>Hasil Sumber (Source)</th>
+                                            <th>Status</th>
+                                            <th class="text-end min-w-100px">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-semibold" id="rules_tbody">
+                                        @forelse($rules as $rule)
+                                        <tr id="rule-row-{{ $rule->id }}" data-json="{{ json_encode($rule) }}">
+                                            <td>
+                                                <span class="fw-bold text-gray-800" id="rule-name-{{ $rule->id }}">{{ $rule->name }}</span>
+                                            </td>
+                                            <td>
+                                                <code class="text-primary fw-bold fs-7 bg-light-primary px-2 py-1 rounded" id="rule-keyword-{{ $rule->id }}">{{ $rule->keyword }}</code>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light-secondary" id="rule-type-{{ $rule->id }}">
+                                                    @if($rule->match_type === 'exact')
+                                                        Sama Persis
+                                                    @elseif($rule->match_type === 'starts_with')
+                                                        Diawali Kata
+                                                    @else
+                                                        Mengandung Kata
+                                                    @endif
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-light-info fw-bold fs-7 py-1 px-3" id="rule-source-{{ $rule->id }}">
+                                                    <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $rule->source_name }}
+                                                </span>
+                                            </td>
+                                            <td id="status-col-{{ $rule->id }}">
+                                                @if($rule->is_active)
+                                                    <span class="badge badge-light-success">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-light-danger">Nonaktif</span>
+                                                @endif
+                                            </td>
+                                            <td class="text-end">
+                                                <button type="button" class="btn btn-sm btn-icon btn-light-primary me-2" 
+                                                    onclick="openEditModal({{ $rule->id }})" 
+                                                    title="Edit">
+                                                    <i class="ki-outline ki-pencil fs-4"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-icon btn-light-{{ $rule->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
+                                                    id="btn-toggle-{{ $rule->id }}"
+                                                    onclick="toggleRuleStatus({{ $rule->id }}, '{{ route('chat-sources.toggle-status', $rule->id) }}')" 
+                                                    title="{{ $rule->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                                    <i class="ki-outline {{ $rule->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
+                                                    onclick="deleteRule({{ $rule->id }}, '{{ route('chat-sources.destroy', $rule->id) }}')" 
+                                                    title="Hapus">
+                                                    <i class="ki-outline ki-trash fs-3"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr id="empty-row">
+                                            <td colspan="6" class="text-center text-muted py-8">Belum ada aturan sumber chat yang dibuat.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body py-4">
-                    <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="rules_table">
-                            <thead>
-                                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                                    <th>Nama Aturan</th>
-                                    <th>Kata Kunci / Pola</th>
-                                    <th>Metode</th>
-                                    <th>Hasil Sumber (Source)</th>
-                                    <th>Status</th>
-                                    <th class="text-end min-w-100px">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 fw-semibold" id="rules_tbody">
-                                @forelse($rules as $rule)
-                                <tr id="rule-row-{{ $rule->id }}" data-json="{{ json_encode($rule) }}">
-                                    <td>
-                                        <span class="fw-bold text-gray-800" id="rule-name-{{ $rule->id }}">{{ $rule->name }}</span>
-                                    </td>
-                                    <td>
-                                        <code class="text-primary fw-bold fs-7 bg-light-primary px-2 py-1 rounded" id="rule-keyword-{{ $rule->id }}">{{ $rule->keyword }}</code>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-light-secondary" id="rule-type-{{ $rule->id }}">
-                                            @if($rule->match_type === 'exact')
-                                                Sama Persis
-                                            @elseif($rule->match_type === 'starts_with')
-                                                Diawali Kata
-                                            @else
-                                                Mengandung Kata
-                                            @endif
-                                        </span>
-                                    </td>
-                                    <td>
-                                        <span class="badge badge-light-info fw-bold fs-7 py-1 px-3" id="rule-source-{{ $rule->id }}">
-                                            <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $rule->source_name }}
-                                        </span>
-                                    </td>
-                                    <td id="status-col-{{ $rule->id }}">
-                                        @if($rule->is_active)
-                                            <span class="badge badge-light-success">Aktif</span>
-                                        @else
-                                            <span class="badge badge-light-danger">Nonaktif</span>
-                                        @endif
-                                    </td>
-                                    <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-icon btn-light-primary me-2" 
-                                            onclick="openEditModal({{ $rule->id }})" 
-                                            title="Edit">
-                                            <i class="ki-outline ki-pencil fs-4"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-icon btn-light-{{ $rule->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
-                                            id="btn-toggle-{{ $rule->id }}"
-                                            onclick="toggleRuleStatus({{ $rule->id }}, '{{ route('chat-sources.toggle-status', $rule->id) }}')" 
-                                            title="{{ $rule->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                            <i class="ki-outline {{ $rule->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                            onclick="deleteRule({{ $rule->id }}, '{{ route('chat-sources.destroy', $rule->id) }}')" 
-                                            title="Hapus">
-                                            <i class="ki-outline ki-trash fs-3"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr id="empty-row">
-                                    <td colspan="6" class="text-center text-muted py-8">Belum ada aturan sumber chat yang dibuat.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <!--end::Main column-->
             </div>
 
         </div>

@@ -42,69 +42,77 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
 
-            <div class="card">
-                <div class="card-header border-0 pt-6">
-                    <div class="card-title">
-                        <h2>Daftar API Keys</h2>
+            <div class="d-flex flex-column flex-lg-row">
+                @include('settings.sidebar')
+
+                <!--begin::Main column-->
+                <div class="flex-row-fluid">
+                    <div class="card">
+                        <div class="card-header border-0 pt-6">
+                            <div class="card-title">
+                                <h2>Daftar API Keys</h2>
+                            </div>
+                        </div>
+                        <div class="card-body py-4">
+                            <div class="table-responsive">
+                                <table class="table align-middle table-row-dashed fs-6 gy-5" id="api_keys_table">
+                                    <thead>
+                                        <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
+                                            <th>Nama</th>
+                                            <th>API Key (Token)</th>
+                                            <th>Status</th>
+                                            <th>Dibuat</th>
+                                            <th class="text-end min-w-100px">Aksi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-gray-600 fw-semibold" id="api_keys_tbody">
+                                        @forelse($apiKeys as $key)
+                                        <tr id="key-row-{{ $key->id }}">
+                                            <td>
+                                                <span class="fw-bold text-gray-800">{{ $key->name }}</span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <code class="me-2 text-primary fw-bold" id="key-text-{{ $key->id }}">{{ $key->key }}</code>
+                                                    <button type="button" class="btn btn-icon btn-sm btn-light-primary btn-copy" onclick="copyKey('{{ $key->key }}')" title="Salin Key">
+                                                        <i class="ki-outline ki-copy fs-4"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                            <td id="status-col-{{ $key->id }}">
+                                                @if($key->is_active)
+                                                    <span class="badge badge-light-success">Aktif</span>
+                                                @else
+                                                    <span class="badge badge-light-danger">Nonaktif</span>
+                                                @endif
+                                            </td>
+                                            <td>{{ $key->created_at->format('d M Y') }}</td>
+                                            <td class="text-end">
+                                                <button type="button" class="btn btn-sm btn-icon btn-light-{{ $key->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
+                                                    id="btn-toggle-{{ $key->id }}"
+                                                    onclick="toggleKeyStatus({{ $key->id }}, '{{ route('api-keys.toggle-status', $key->id) }}')" 
+                                                    title="{{ $key->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                                    <i class="ki-outline {{ $key->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
+                                                    onclick="deleteKey({{ $key->id }}, '{{ route('api-keys.destroy', $key->id) }}')" 
+                                                    title="Hapus">
+                                                    <i class="ki-outline ki-trash fs-3"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        @empty
+                                        <tr id="empty-row">
+                                            <td colspan="5" class="text-center text-muted py-8">Belum ada API Key yang dibuat.</td>
+                                        </tr>
+                                        @endforelse
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="card-body py-4">
-                    <div class="table-responsive">
-                        <table class="table align-middle table-row-dashed fs-6 gy-5" id="api_keys_table">
-                            <thead>
-                                <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                                    <th>Nama</th>
-                                    <th>API Key (Token)</th>
-                                    <th>Status</th>
-                                    <th>Dibuat</th>
-                                    <th class="text-end min-w-100px">Aksi</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-gray-600 fw-semibold" id="api_keys_tbody">
-                                @forelse($apiKeys as $key)
-                                <tr id="key-row-{{ $key->id }}">
-                                    <td>
-                                        <span class="fw-bold text-gray-800">{{ $key->name }}</span>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center">
-                                            <code class="me-2 text-primary fw-bold" id="key-text-{{ $key->id }}">{{ $key->key }}</code>
-                                            <button type="button" class="btn btn-icon btn-sm btn-light-primary btn-copy" onclick="copyKey('{{ $key->key }}')" title="Salin Key">
-                                                <i class="ki-outline ki-copy fs-4"></i>
-                                            </button>
-                                        </div>
-                                    </td>
-                                    <td id="status-col-{{ $key->id }}">
-                                        @if($key->is_active)
-                                            <span class="badge badge-light-success">Aktif</span>
-                                        @else
-                                            <span class="badge badge-light-danger">Nonaktif</span>
-                                        @endif
-                                    </td>
-                                    <td>{{ $key->created_at->format('d M Y') }}</td>
-                                    <td class="text-end">
-                                        <button type="button" class="btn btn-sm btn-icon btn-light-{{ $key->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
-                                            id="btn-toggle-{{ $key->id }}"
-                                            onclick="toggleKeyStatus({{ $key->id }}, '{{ route('api-keys.toggle-status', $key->id) }}')" 
-                                            title="{{ $key->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                            <i class="ki-outline {{ $key->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                            onclick="deleteKey({{ $key->id }}, '{{ route('api-keys.destroy', $key->id) }}')" 
-                                            title="Hapus">
-                                            <i class="ki-outline ki-trash fs-3"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                @empty
-                                <tr id="empty-row">
-                                    <td colspan="5" class="text-center text-muted py-8">Belum ada API Key yang dibuat.</td>
-                                </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <!--end::Main column-->
             </div>
 
         </div>
