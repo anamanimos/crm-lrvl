@@ -45,6 +45,9 @@
                                 <a href="#list-customers" class="nav-link text-gray-600 text-hover-primary fs-7">List Customers</a>
                                 <a href="#get-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Get Customer</a>
                                 <a href="#create-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Create Customer</a>
+                                <div class="separator my-4"></div>
+                                <div class="px-3 text-muted fw-bold fs-8 text-uppercase mb-2">Reports</div>
+                                <a href="#new-chatters" class="nav-link text-gray-600 text-hover-primary fs-7">New Chatters Report</a>
                             </nav>
                         </div>
                     </div>
@@ -192,6 +195,66 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                </div>
+                            </section>
+
+                            <div class="separator separator-dashed my-10"></div>
+
+                            <!-- REPORTS -->
+                            <section id="reports">
+                                <h2 class="text-primary fw-bold fs-1 mb-10">Reports Resource</h2>
+
+                                <!-- NEW CHATTERS -->
+                                <div id="new-chatters" class="mb-15">
+                                    <div class="d-flex align-items-center mb-5">
+                                        <span class="badge badge-light-primary fw-bold fs-4 py-2 px-4 me-4">GET</span>
+                                        <h3 class="text-gray-800 fw-bold fs-3 m-0">/reports/new-chatters</h3>
+                                    </div>
+                                    <p class="text-gray-600 mb-6">Melihat jumlah orang baru (customer) yang melakukan chat, dapat difilter berdasarkan rentang tanggal. (Default: hari ini)</p>
+                                    
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Query Parameters</h4>
+                                    <div class="table-responsive mb-8">
+                                        <table class="table table-row-bordered table-row-gray-300 align-middle">
+                                            <thead>
+                                                <tr class="fw-bold text-muted bg-light">
+                                                    <th class="ps-4 rounded-start">Param</th>
+                                                    <th>Type</th>
+                                                    <th class="rounded-end">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="ps-4"><code>start_date</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>Tanggal awal (format: YYYY-MM-DD, opsional)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>end_date</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>Tanggal akhir (format: YYYY-MM-DD, opsional)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
+  "success": true,
+  "start_date": "2026-08-27",
+  "end_date": "2026-08-28",
+  "data": [
+    {
+      "date": "2026-08-27",
+      "new_chatters_count": 5,
+      "total_chatters_count": 12
+    },
+    {
+      "date": "2026-08-28",
+      "new_chatters_count": 3,
+      "total_chatters_count": 9
+    }
+  ]
+}</code></pre>
                                 </div>
                             </section>
 

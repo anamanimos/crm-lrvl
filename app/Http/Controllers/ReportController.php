@@ -491,4 +491,48 @@ class ReportController extends Controller
         }
         return (($today - $yesterday) / $yesterday) * 100;
     }
+
+    public function apiNewChatters(Request $request)
+    {
+        // Parameter date range, default today
+        $startDate = $request->input('start_date', Carbon::today()->format('Y-m-d'));
+        $endDate = $request->input('end_date', Carbon::today()->format('Y-m-d'));
+
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
+
+        $current = $start->copy();
+        $dailyData = [];
+
+        while ($current <= $end) {
+            $dayStart = $current->copy()->startOfDay();
+            $dayEnd = $current->copy()->endOfDay();
+
+            // Get unique customers who sent a message on this specific day
+            $customersChattedIn = Message::whereBetween('created_at', [$dayStart, $dayEnd])
+                ->where('direction', 'in')
+                ->pluck('customer_id')
+                ->unique();
+
+            // Count how many of them were created on this same day
+            $newCustomersCount = Customer::whereIn('id', $customersChattedIn)
+                ->whereBetween('created_at', [$dayStart, $dayEnd])
+                ->count();
+
+            $dailyData[] = [
+                'date' => $dayStart->format('Y-m-d'),
+                'new_chatters_count' => $newCustomersCount,
+                'total_chatters_count' => $customersChattedIn->count()
+            ];
+
+            $current->addDay();
+        }
+
+        return response()->json([
+            'success' => true,
+            'start_date' => $start->format('Y-m-d'),
+            'end_date' => $end->format('Y-m-d'),
+            'data' => $dailyData
+        ]);
+    }
 }

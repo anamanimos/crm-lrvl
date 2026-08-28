@@ -89,6 +89,9 @@
                                 <a href="{{ route('settings.section', 'backup') }}" class="btn btn-color-muted btn-active-light-primary fw-bold px-3 py-3 text-start fs-6 {{ $section == 'backup' ? 'active' : '' }}">
                                     <i class="ki-outline ki-cloud-change fs-3 me-2"></i> Backup & Maintenance
                                 </a>
+                                <a href="{{ route('api-keys.index') }}" class="btn btn-color-muted btn-active-light-primary fw-bold px-3 py-3 text-start fs-6">
+                                    <i class="ki-outline ki-key fs-3 me-2"></i> API Keys
+                                </a>
                             </div>
                         </div>
                     </div>

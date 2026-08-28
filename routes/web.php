@@ -149,6 +149,14 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/settings/stages/delete/{id}', [DealStageController::class, 'destroy'])->name('stages.delete');
     });
 
+    // API Keys Management (Must be before settings wildcard route)
+    Route::prefix('settings/api-keys')->name('api-keys.')->group(function() {
+        Route::get('/', [\App\Http\Controllers\ApiKeyController::class, 'index'])->name('index');
+        Route::post('/store', [\App\Http\Controllers\ApiKeyController::class, 'store'])->name('store');
+        Route::post('/{id}/toggle-status', [\App\Http\Controllers\ApiKeyController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{id}', [\App\Http\Controllers\ApiKeyController::class, 'destroy'])->name('destroy');
+    });
+
     // Settings (No /admin prefix)
     Route::name('settings.')->group(function() {
         Route::get('/settings/test/erp', [SettingController::class, 'testErp'])->name('test.erp');
@@ -207,3 +215,8 @@ Route::middleware(['auth'])->group(function () {
 
 
 require __DIR__.'/auth.php';
+
+// Public API Routes
+Route::prefix('api')->middleware('api.key')->group(function () {
+    Route::get('/reports/new-chatters', [ReportController::class, 'apiNewChatters']);
+});
