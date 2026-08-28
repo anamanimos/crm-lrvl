@@ -243,5 +243,6 @@
     <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
     
     @stack('js')
+    @stack('scripts')
 </body>
 </html>

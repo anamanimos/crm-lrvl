@@ -41,10 +41,32 @@ class CustomerController extends Controller
             $query->where('source', $request->source);
         }
 
-        if ($request->filled('archive')) {
-            $query->where('is_archived', $request->archive);
+        if ($request->has('archive') && $request->archive !== '' && $request->archive !== 'all') {
+            $query->where('is_archived', (int) $request->archive);
+        } elseif ($request->input('archive') === 'all') {
+            // No filter on is_archived
         } else {
             $query->where('is_archived', 0);
+        }
+
+        $sort = $request->input('sort', 'latest');
+        switch ($sort) {
+            case 'oldest':
+                $query->oldest('id');
+                break;
+            case 'name_asc':
+                $query->orderBy('name', 'asc');
+                break;
+            case 'name_desc':
+                $query->orderBy('name', 'desc');
+                break;
+            case 'last_chat':
+                $query->orderByDesc('last_chat_at');
+                break;
+            case 'latest':
+            default:
+                $query->latest('id');
+                break;
         }
 
         $perPage = (int) $request->input('per_page', 20);
@@ -52,7 +74,7 @@ class CustomerController extends Controller
             $perPage = 20;
         }
 
-        $customers = $query->latest()->paginate($perPage)->withQueryString();
+        $customers = $query->paginate($perPage)->withQueryString();
         $labels = Label::withCount('customers')->get();
 
         $sources = ChatSourceRule::pluck('source_name')
