@@ -155,21 +155,25 @@
                     <div class="card card-flush">
                         <!--begin::Card header-->
                         <div class="card-header border-0 pt-6">
-                            <!--begin::Card title (Filter Button on left, Search form on right of Filter)-->
-                            <div class="card-title w-100 w-md-auto">
+                            <!--begin::Card title (Left: Data per page select & Search Input)-->
+                            <div class="card-title">
                                 <div class="d-flex align-items-center flex-wrap gap-3">
-                                    <!-- Filter Button (Opens Modal) -->
-                                    <button type="button" class="btn btn-sm btn-light-primary fw-bold d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_customer_filter">
-                                        <i class="ki-outline ki-filter fs-4 me-1"></i>
-                                        <span>Filter</span>
-                                        <span id="active-filter-badge" class="badge badge-circle badge-primary ms-2 d-none" style="width: 18px; height: 18px; font-size: 10px;">0</span>
-                                    </button>
+                                    <!-- Select Data per page di kiri -->
+                                    <div class="d-flex align-items-center">
+                                        <select id="filter-per-page" class="form-select form-select-solid form-select-sm w-75px" title="Data per Halaman">
+                                            @foreach ([10, 20, 50, 100] as $limit)
+                                            <option value="{{ $limit }}" {{ request('per_page', 20) == $limit ? 'selected' : '' }}>
+                                                {{ $limit }}
+                                            </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
 
-                                    <!-- Search Input Form (at the right of Filter button) -->
+                                    <!-- Search Input -->
                                     <div class="d-flex align-items-center position-relative my-1">
                                         <i class="ki-outline ki-magnifier fs-3 position-absolute ms-4 text-gray-500"></i>
                                         <input type="text" id="filter-search" 
-                                               class="form-control form-control-solid w-250px w-md-300px ps-12 pe-10" 
+                                               class="form-control form-control-solid w-225px w-md-275px ps-12 pe-10" 
                                                placeholder="Cari nama, WA, email..." 
                                                value="{{ request('search') }}" />
                                         <span id="search-spinner" class="spinner-border spinner-border-sm text-primary position-absolute end-0 me-3 d-none"></span>
@@ -177,10 +181,52 @@
                                 </div>
                             </div>
                             <!--end::Card title-->
+                            
+                            <!--begin::Card toolbar (Right / Area Merah: Filter & Kolom)-->
+                            <div class="card-toolbar">
+                                <div class="d-flex align-items-center gap-2">
+                                    <!-- Filter Button (Opens Modal) -->
+                                    <button type="button" class="btn btn-sm btn-light-primary fw-bold d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#kt_modal_customer_filter">
+                                        <i class="ki-outline ki-filter fs-4 me-1"></i>
+                                        <span>Filter</span>
+                                        <span id="active-filter-badge" class="badge badge-circle badge-primary ms-2 d-none" style="width: 18px; height: 18px; font-size: 10px;">0</span>
+                                    </button>
+
+                                    <!-- Kolom Dropdown -->
+                                    <div class="dropdown">
+                                        <button type="button" class="btn btn-sm btn-light-primary fw-bold dropdown-toggle d-flex align-items-center" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">
+                                            <i class="ki-outline ki-element-plus fs-4 me-1"></i>
+                                            <span>Kolom</span>
+                                        </button>
+                                        <div class="dropdown-menu dropdown-menu-end p-4 w-200px shadow-sm">
+                                            <h6 class="dropdown-header text-gray-800 fw-bold px-0 mb-3 fs-7">Tampilkan Kolom</h6>
+                                            <div class="d-flex flex-column gap-2" id="column-visibility-toggles">
+                                                <label class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-company" checked />
+                                                    <span class="form-check-label fs-7 text-gray-700">Perusahaan</span>
+                                                </label>
+                                                <label class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-whatsapp" checked />
+                                                    <span class="form-check-label fs-7 text-gray-700">Nomor WA</span>
+                                                </label>
+                                                <label class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-label" checked />
+                                                    <span class="form-check-label fs-7 text-gray-700">Label</span>
+                                                </label>
+                                                <label class="form-check form-check-sm form-check-custom form-check-solid">
+                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-last-chat" checked />
+                                                    <span class="form-check-label fs-7 text-gray-700">Terakhir Chat</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!--end::Card toolbar-->
                         </div>
                         <!--end::Card header-->
 
-                        <!--begin::Active Filter Pills with Reset Button on the Left-->
+                        <!--begin::Active Filter Pills with Reset Button on Left-->
                         <div class="px-7 pt-2 pb-0" id="active-filters-container" style="display: none;">
                             <div class="d-flex flex-wrap align-items-center gap-2">
                                 <!-- Reset Button on the Left of Active Filters -->
@@ -241,7 +287,7 @@
                         <!-- Label Filter -->
                         <div class="mb-5">
                             <label class="form-label fw-semibold fs-7 text-gray-700 mb-2">Label Customer:</label>
-                            <select id="modal-filter-label" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                            <select id="modal-filter-label" class="form-select form-select-solid">
                                 <option value="">Semua Label</option>
                                 @foreach ($labels as $label)
                                 <option value="{{ $label->id }}" {{ request('label') == $label->id ? 'selected' : '' }}>
@@ -254,7 +300,7 @@
                         <!-- Source Filter -->
                         <div class="mb-5">
                             <label class="form-label fw-semibold fs-7 text-gray-700 mb-2">Sumber (*Source*):</label>
-                            <select id="modal-filter-source" class="form-select form-select-solid" data-control="select2" data-hide-search="true">
+                            <select id="modal-filter-source" class="form-select form-select-solid">
                                 <option value="">Semua Sumber</option>
                                 @foreach ($sources as $source)
                                 <option value="{{ $source }}" {{ request('source') == $source ? 'selected' : '' }}>
@@ -275,7 +321,7 @@
                         </div>
 
                         <!-- Sort Order -->
-                        <div class="mb-5">
+                        <div class="mb-2">
                             <label class="form-label fw-semibold fs-7 text-gray-700 mb-2">Urutkan Berdasarkan:</label>
                             <select id="modal-filter-sort" class="form-select form-select-solid">
                                 <option value="latest" {{ request('sort', 'latest') == 'latest' ? 'selected' : '' }}>Terbaru Ditambahkan</option>
@@ -283,18 +329,6 @@
                                 <option value="last_chat" {{ request('sort') == 'last_chat' ? 'selected' : '' }}>Terakhir Chat</option>
                                 <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Nama (A - Z)</option>
                                 <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>Nama (Z - A)</option>
-                            </select>
-                        </div>
-
-                        <!-- Data per Page -->
-                        <div class="mb-2">
-                            <label class="form-label fw-semibold fs-7 text-gray-700 mb-2">Jumlah per Halaman:</label>
-                            <select id="modal-filter-per-page" class="form-select form-select-solid">
-                                @foreach ([10, 20, 50, 100] as $limit)
-                                <option value="{{ $limit }}" {{ request('per_page', 20) == $limit ? 'selected' : '' }}>
-                                    {{ $limit }} entri per halaman
-                                </option>
-                                @endforeach
                             </select>
                         </div>
                     </form>
@@ -330,11 +364,11 @@
             // Elements
             const searchInput = document.getElementById('filter-search');
             const searchSpinner = document.getElementById('search-spinner');
+            const perPageSelect = document.getElementById('filter-per-page');
             const modalLabel = document.getElementById('modal-filter-label');
             const modalSource = document.getElementById('modal-filter-source');
             const modalArchive = document.getElementById('modal-filter-archive');
             const modalSort = document.getElementById('modal-filter-sort');
-            const modalPerPage = document.getElementById('modal-filter-per-page');
             const btnModalApply = document.getElementById('btn-modal-apply');
             const btnModalReset = document.getElementById('btn-modal-reset');
             const btnQuickReset = document.getElementById('btn-quick-reset');
@@ -342,6 +376,49 @@
             const activeFiltersContainer = document.getElementById('active-filters-container');
             const activeFiltersPills = document.getElementById('active-filters-pills');
             const tableContainer = document.getElementById('customer-table-container');
+
+            // --- Column Visibility Handling ---
+            function applyColumnVisibility() {
+                const toggles = document.querySelectorAll('.toggle-column-cb');
+                toggles.forEach(cb => {
+                    const colClass = cb.value;
+                    const isVisible = cb.checked;
+                    const elements = document.querySelectorAll('.' + colClass);
+                    elements.forEach(el => {
+                        if (isVisible) {
+                            el.classList.remove('d-none');
+                        } else {
+                            el.classList.add('d-none');
+                        }
+                    });
+                });
+            }
+
+            // Bind checkbox change
+            document.querySelectorAll('.toggle-column-cb').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    applyColumnVisibility();
+                    try {
+                        const saved = {};
+                        document.querySelectorAll('.toggle-column-cb').forEach(item => {
+                            saved[item.value] = item.checked;
+                        });
+                        localStorage.setItem('crm_customer_columns', JSON.stringify(saved));
+                    } catch(e) {}
+                });
+            });
+
+            // Load saved column preferences
+            try {
+                const saved = JSON.parse(localStorage.getItem('crm_customer_columns'));
+                if (saved) {
+                    document.querySelectorAll('.toggle-column-cb').forEach(cb => {
+                        if (saved.hasOwnProperty(cb.value)) {
+                            cb.checked = saved[cb.value];
+                        }
+                    });
+                }
+            } catch(e) {}
 
             function getFilterParams() {
                 const params = new URLSearchParams();
@@ -353,7 +430,7 @@
                 if (modalSource && modalSource.value) params.set('source', modalSource.value);
                 if (modalArchive && modalArchive.value !== '' && modalArchive.value !== '0') params.set('archive', modalArchive.value);
                 if (modalSort && modalSort.value && modalSort.value !== 'latest') params.set('sort', modalSort.value);
-                if (modalPerPage && modalPerPage.value && modalPerPage.value !== '20') params.set('per_page', modalPerPage.value);
+                if (perPageSelect && perPageSelect.value && perPageSelect.value !== '20') params.set('per_page', perPageSelect.value);
 
                 return params;
             }
@@ -449,6 +526,9 @@
                             tableContainer.innerHTML = response.html;
                         }
 
+                        // Apply Column Visibility
+                        applyColumnVisibility();
+
                         // Reinitialize Metronic Menus
                         if (typeof KTMenu !== 'undefined') {
                             KTMenu.createInstances();
@@ -487,6 +567,13 @@
                 });
             }
 
+            // Per page dropdown change
+            if (perPageSelect) {
+                perPageSelect.addEventListener('change', function() {
+                    loadCustomers();
+                });
+            }
+
             // Apply Filters from Modal
             if (btnModalApply) {
                 btnModalApply.addEventListener('click', function() {
@@ -506,7 +593,6 @@
                     if (modalSource) modalSource.value = '';
                     if (modalArchive) modalArchive.value = '0';
                     if (modalSort) modalSort.value = 'latest';
-                    if (modalPerPage) modalPerPage.value = '20';
                     
                     const modalEl = document.getElementById('kt_modal_customer_filter');
                     const modalInstance = bootstrap.Modal.getInstance(modalEl);
@@ -517,7 +603,7 @@
                 });
             }
 
-            // Quick Reset Button on toolbar
+            // Quick Reset Button on active filters bar
             if (btnQuickReset) {
                 btnQuickReset.addEventListener('click', function() {
                     if (searchInput) searchInput.value = '';
@@ -525,7 +611,7 @@
                     if (modalSource) modalSource.value = '';
                     if (modalArchive) modalArchive.value = '0';
                     if (modalSort) modalSort.value = 'latest';
-                    if (modalPerPage) modalPerPage.value = '20';
+                    if (perPageSelect) perPageSelect.value = '20';
                     loadCustomers();
                 });
             }
@@ -621,7 +707,8 @@
                 });
             });
 
-            // Initialize badges on page load
+            // Initializations on page load
+            applyColumnVisibility();
             updateFilterBadges();
         })();
     </script>

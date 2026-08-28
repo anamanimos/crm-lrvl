@@ -10,18 +10,18 @@
     <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_customers_table">
         <thead>
             <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-                <th class="min-w-125px">Customer</th>
-                <th class="min-w-100px">Perusahaan</th>
-                <th class="min-w-125px">Nomor WA</th>
-                <th class="min-w-100px">Label</th>
-                <th class="min-w-100px">Terakhir Chat</th>
-                <th class="text-end min-w-100px">Aksi</th>
+                <th class="min-w-125px col-customer">Customer</th>
+                <th class="min-w-100px col-company">Perusahaan</th>
+                <th class="min-w-125px col-whatsapp">Nomor WA</th>
+                <th class="min-w-100px col-label">Label</th>
+                <th class="min-w-100px col-last-chat">Terakhir Chat</th>
+                <th class="text-end min-w-100px col-action">Aksi</th>
             </tr>
         </thead>
         <tbody class="text-gray-600 fw-semibold">
             @forelse ($customers as $customer)
             <tr>
-                <td>
+                <td class="col-customer">
                     <div class="d-flex align-items-center">
                         <div class="symbol symbol-circle symbol-40px me-3">
                             <div class="symbol-label fs-5 fw-semibold bg-light-primary text-primary">
@@ -48,20 +48,20 @@
                         </div>
                     </div>
                 </td>
-                <td>
+                <td class="col-company">
                     @if ($customer->company)
                     <span class="text-gray-800 fw-bold">{{ $customer->company->name }}</span>
                     @else
                     <span class="text-muted">-</span>
                     @endif
                 </td>
-                <td>
+                <td class="col-whatsapp">
                     <a href="https://wa.me/{{ $customer->wa_number }}" target="_blank" 
                        class="text-gray-600 text-hover-primary">
                         {{ format_phone_display($customer->wa_number) }}
                     </a>
                 </td>
-                <td>
+                <td class="col-label">
                     @if ($customer->labels->isNotEmpty())
                     <div class="d-flex flex-wrap gap-1">
                         @foreach ($customer->labels as $label)
@@ -74,10 +74,10 @@
                     <span class="text-muted">-</span>
                     @endif
                 </td>
-                <td>
+                <td class="col-last-chat">
                     {{ time_ago($customer->last_chat_at) }}
                 </td>
-                <td class="text-end">
+                <td class="text-end col-action">
                     <a href="#" class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" 
                        data-kt-menu-trigger="click" data-kt-menu-placement="bottom-end">
                         Aksi
