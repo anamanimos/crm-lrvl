@@ -170,6 +170,9 @@ class CustomerController extends Controller
         ]);
 
         $phone = format_phone($request->wa_number);
+        if (strlen($phone) < 10 || in_array($phone, ['62', '620', '6200', '62000', '62123', '621234', '6212345'])) {
+            return redirect()->back()->withInput()->with('error', 'Nomor WhatsApp tidak valid. Masukkan minimal 10 digit nomor telepon.');
+        }
 
         // Check if exists
         $existing = Customer::where('wa_number', $phone)->first();
@@ -239,6 +242,9 @@ class CustomerController extends Controller
         ]);
 
         $phone = format_phone($request->wa_number);
+        if (strlen($phone) < 10 || in_array($phone, ['62', '620', '6200', '62000', '62123', '621234', '6212345'])) {
+            return redirect()->back()->withInput()->with('error', 'Nomor WhatsApp tidak valid. Masukkan minimal 10 digit nomor telepon.');
+        }
 
         // Check if exists other than this
         $existing = Customer::where('wa_number', $phone)->where('id', '!=', $id)->first();
@@ -448,6 +454,13 @@ class CustomerController extends Controller
         }
 
         $phone = format_phone($request->input('whatsapp', $request->input('wa_number')));
+        if (strlen($phone) < 10 || in_array($phone, ['62', '620', '6200', '62000', '62123', '621234', '6212345'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp tidak valid (minimal 10 digit nomor yang valid).'
+            ], 422);
+        }
+
         $existing = Customer::where('wa_number', $phone)->first();
         if ($existing) {
             return response()->json([
@@ -588,6 +601,12 @@ class CustomerController extends Controller
         $newPhone = $request->input('whatsapp', $request->input('wa_number'));
         if ($newPhone !== null) {
             $formattedPhone = format_phone($newPhone);
+            if (strlen($formattedPhone) < 10 || in_array($formattedPhone, ['62', '620', '6200', '62000', '62123', '621234', '6212345'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor WhatsApp tidak valid (minimal 10 digit nomor yang valid).'
+                ], 422);
+            }
             $existing = Customer::where('wa_number', $formattedPhone)->where('id', '!=', $customer->id)->first();
             if ($existing) {
                 return response()->json([
