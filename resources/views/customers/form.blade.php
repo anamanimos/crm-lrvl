@@ -94,10 +94,23 @@
                                 <!--begin::Input group-->
                                 <div class="mb-10">
                                     <label class="form-label">Sumber / Asal Customer</label>
-                                    <input type="text" name="source" class="form-control mb-2" 
-                                           placeholder="Contoh: Instagram, Website, Iklan Facebook, Referral, dll." 
-                                           value="{{ old('source', $customer->source ?? '') }}" />
-                                    <div class="text-muted fs-7">Darimana kontak/customer ini pertama kali didapatkan.</div>
+                                    <select name="source" class="form-select mb-2" data-control="select2" 
+                                            data-placeholder="Pilih atau Ketik Sumber Asal Customer" 
+                                            data-allow-clear="true" data-tags="true">
+                                        <option value="">-- Pilih Sumber Customer --</option>
+                                        @if(isset($sources))
+                                            @foreach ($sources as $src)
+                                            <option value="{{ $src }}" 
+                                                    {{ (old('source', $customer->source ?? '') == $src) ? 'selected' : '' }}>
+                                                {{ $src }}
+                                            </option>
+                                            @endforeach
+                                        @endif
+                                        @if(!empty($customer->source) && (!isset($sources) || !$sources->contains($customer->source)))
+                                            <option value="{{ $customer->source }}" selected>{{ $customer->source }}</option>
+                                        @endif
+                                    </select>
+                                    <div class="text-muted fs-7">Pilih dari opsi yang tersedia atau ketik sumber baru (cth: TikTok, Instagram, Website, dll).</div>
                                 </div>
                                 <!--end::Input group-->
                                 

@@ -62,9 +62,13 @@ class CustomerController extends Controller
         $labels = Label::all();
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
+        $sources = \App\Models\ChatSourceRule::pluck('source_name')
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->unique()
+            ->values();
         $customer = null;
 
-        return view('customers.form', compact('labels', 'users', 'companies', 'customer'));
+        return view('customers.form', compact('labels', 'users', 'companies', 'sources', 'customer'));
     }
 
     public function store(Request $request)
@@ -126,8 +130,12 @@ class CustomerController extends Controller
         $labels = Label::all();
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
+        $sources = \App\Models\ChatSourceRule::pluck('source_name')
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->unique()
+            ->values();
 
-        return view('customers.form', compact('customer', 'labels', 'users', 'companies'));
+        return view('customers.form', compact('customer', 'labels', 'users', 'companies', 'sources'));
     }
 
     public function update(Request $request, $id)
