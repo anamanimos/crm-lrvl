@@ -45,6 +45,7 @@
                                 <a href="#list-customers" class="nav-link text-gray-600 text-hover-primary fs-7">List Customers</a>
                                 <a href="#get-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Get Customer</a>
                                 <a href="#create-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Create Customer</a>
+                                <a href="#update-customer" class="nav-link text-gray-600 text-hover-primary fs-7">Update Customer</a>
                                 <div class="separator my-4"></div>
                                 <div class="px-3 text-muted fw-bold fs-8 text-uppercase mb-2">Reports</div>
                                 <a href="#new-chatters" class="nav-link text-gray-600 text-hover-primary fs-7">New Chatters Report</a>
@@ -255,6 +256,168 @@
                                             </tbody>
                                         </table>
                                     </div>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
+  "success": true,
+  "message": "Customer berhasil dibuat.",
+  "data": {
+    "id": 1025,
+    "name": "Ahmad Dani",
+    "whatsapp": "6281234567890",
+    "email": "ahmad@example.com",
+    "source": "Instagram",
+    "address": "Jakarta",
+    "notes": null,
+    "company": null,
+    "assigned_user": null,
+    "labels": [],
+    "created_at": "2026-08-28 17:00:00"
+  }
+}</code></pre>
+                                </div>
+
+                                <!-- UPDATE -->
+                                <div id="update-customer" class="mb-15">
+                                    <div class="d-flex align-items-center mb-5">
+                                        <span class="badge badge-light-warning fw-bold fs-4 py-2 px-4 me-4">PUT / POST</span>
+                                        <h3 class="text-gray-800 fw-bold fs-3 m-0">/customers/{id}</h3>
+                                    </div>
+                                    <p class="text-gray-600 mb-6">Memperbarui data customer berdasarkan ID atau nomor WhatsApp.</p>
+                                    
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Path Parameters</h4>
+                                    <div class="table-responsive mb-8">
+                                        <table class="table table-row-bordered table-row-gray-300 align-middle">
+                                            <thead>
+                                                <tr class="fw-bold text-muted bg-light">
+                                                    <th class="ps-4 rounded-start">Param</th>
+                                                    <th>Type</th>
+                                                    <th>Required</th>
+                                                    <th class="rounded-end">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="ps-4"><code>id</code></td>
+                                                    <td><span class="badge badge-light">int | string</span></td>
+                                                    <td><span class="text-danger fw-bold">Yes</span></td>
+                                                    <td>ID Customer (cth: <code>1023</code>) atau nomor WhatsApp lama (cth: <code>628113780819</code>)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Body Parameters</h4>
+                                    <div class="table-responsive mb-8">
+                                        <table class="table table-row-bordered table-row-gray-300 align-middle">
+                                            <thead>
+                                                <tr class="fw-bold text-muted bg-light">
+                                                    <th class="ps-4 rounded-start">Param</th>
+                                                    <th>Type</th>
+                                                    <th>Required</th>
+                                                    <th class="rounded-end">Description</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td class="ps-4"><code>name</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Nama customer baru</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>whatsapp</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Nomor WhatsApp baru (format: 62...)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>source</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Sumber customer (cth: <code>TikTok</code>, <code>Instagram</code>, <code>Website</code>, dll)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>email</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Alamat email customer</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>address</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Alamat customer</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>notes</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Catatan internal</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>company</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>No</td>
+                                                    <td>Nama perusahaan (otomatis dibuat jika belum ada)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>labels</code></td>
+                                                    <td><span class="badge badge-light">array</span></td>
+                                                    <td>No</td>
+                                                    <td>Daftar nama label atau ID label (cth: <code>["Hot Lead", "Follow Up"]</code>)</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Request Payload Example</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-white fs-7 mb-8"><code>{
+  "name": "Budi Santoso",
+  "source": "TikTok",
+  "email": "budi.baru@example.com",
+  "address": "Jl. Gatot Subroto No. 12, Jakarta",
+  "notes": "Sudah deal paket A",
+  "company": "PT Sukses Makmur",
+  "labels": ["Hot Lead", "Closing"]
+}</code></pre>
+
+                                    <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
+                                    <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
+  "success": true,
+  "message": "Customer berhasil diperbarui.",
+  "data": {
+    "id": 1023,
+    "name": "Budi Santoso",
+    "whatsapp": "628113780819",
+    "email": "budi.baru@example.com",
+    "source": "TikTok",
+    "address": "Jl. Gatot Subroto No. 12, Jakarta",
+    "notes": "Sudah deal paket A",
+    "company": {
+      "id": 15,
+      "name": "PT Sukses Makmur"
+    },
+    "assigned_user": {
+      "id": 3,
+      "name": "Sales Admin"
+    },
+    "labels": [
+      {
+        "id": 1,
+        "name": "Hot Lead",
+        "color": "#e74c3c"
+      },
+      {
+        "id": 5,
+        "name": "Closing",
+        "color": "#2ecc71"
+      }
+    ],
+    "created_at": "2026-08-03 14:20:00",
+    "updated_at": "2026-08-28 17:05:00"
+  }
+}</code></pre>
                                 </div>
                             </section>
 

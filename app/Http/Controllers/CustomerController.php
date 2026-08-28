@@ -329,4 +329,276 @@ class CustomerController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Public API: Create new customer.
+     */
+    public function apiStore(Request $request)
+    {
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'whatsapp' => 'required_without:wa_number',
+            'wa_number' => 'required_without:whatsapp',
+            'name' => 'nullable|string|max:255',
+            'email' => 'nullable|email|max:255',
+            'source' => 'nullable|string|max:100',
+            'address' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'company' => 'nullable|string|max:255',
+            'company_id' => 'nullable',
+            'labels' => 'nullable|array',
+            'assigned_user_id' => 'nullable|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $phone = format_phone($request->input('whatsapp', $request->input('wa_number')));
+        $existing = Customer::where('wa_number', $phone)->first();
+        if ($existing) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp sudah terdaftar.',
+                'customer_id' => $existing->id
+            ], 422);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $company_id = null;
+            if ($request->has('company') || $request->has('company_id')) {
+                $companyVal = $request->input('company_id', $request->input('company'));
+                if (is_numeric($companyVal)) {
+                    $company_id = (int) $companyVal;
+                } elseif (!empty($companyVal)) {
+                    $company_id = Company::findOrCreateByName($companyVal);
+                }
+            }
+
+            $customer = Customer::create([
+                'uuid' => (string) Str::uuid(),
+                'wa_number' => $phone,
+                'name' => $request->name,
+                'email' => $request->email,
+                'source' => $request->source ?: 'Unknown',
+                'address' => $request->address,
+                'notes' => $request->notes,
+                'company_id' => $company_id,
+                'assigned_user_id' => $request->assigned_user_id,
+            ]);
+
+            if ($request->has('labels')) {
+                $labelIds = [];
+                foreach ($request->input('labels') as $l) {
+                    if (is_numeric($l)) {
+                        $labelIds[] = (int) $l;
+                    } elseif (is_string($l) && !empty(trim($l))) {
+                        $label = Label::firstOrCreate(
+                            ['name' => trim($l)],
+                            ['color' => '#' . substr(md5(trim($l)), 0, 6)]
+                        );
+                        $labelIds[] = $label->id;
+                    }
+                }
+                $customer->labels()->sync($labelIds);
+            }
+
+            DB::commit();
+
+            $customer->load(['labels', 'company', 'assignedUser']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer berhasil dibuat.',
+                'data' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'whatsapp' => $customer->wa_number,
+                    'email' => $customer->email,
+                    'source' => $customer->source,
+                    'address' => $customer->address,
+                    'notes' => $customer->notes,
+                    'company' => $customer->company ? [
+                        'id' => $customer->company->id,
+                        'name' => $customer->company->name,
+                    ] : null,
+                    'assigned_user' => $customer->assignedUser ? [
+                        'id' => $customer->assignedUser->id,
+                        'name' => $customer->assignedUser->name,
+                    ] : null,
+                    'labels' => $customer->labels->map(function ($label) {
+                        return [
+                            'id' => $label->id,
+                            'name' => $label->name,
+                            'color' => $label->color,
+                        ];
+                    }),
+                    'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : null,
+                ]
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Public API: Update customer details by ID or WhatsApp number.
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        $phone = format_phone($id);
+        $customer = Customer::where('id', $id)
+            ->orWhere('wa_number', $id)
+            ->orWhere('wa_number', $phone)
+            ->first();
+
+        if (!$customer) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Customer tidak ditemukan'
+            ], 404);
+        }
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), [
+            'name' => 'nullable|string|max:255',
+            'whatsapp' => 'nullable|string|max:50',
+            'wa_number' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:255',
+            'source' => 'nullable|string|max:100',
+            'address' => 'nullable|string',
+            'notes' => 'nullable|string',
+            'company' => 'nullable|string|max:255',
+            'company_id' => 'nullable',
+            'labels' => 'nullable|array',
+            'assigned_user_id' => 'nullable|exists:users,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        $data = [];
+        if ($request->has('name')) {
+            $data['name'] = $request->name;
+        }
+
+        $newPhone = $request->input('whatsapp', $request->input('wa_number'));
+        if ($newPhone !== null) {
+            $formattedPhone = format_phone($newPhone);
+            $existing = Customer::where('wa_number', $formattedPhone)->where('id', '!=', $customer->id)->first();
+            if ($existing) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor WhatsApp sudah digunakan oleh customer lain.'
+                ], 422);
+            }
+            $data['wa_number'] = $formattedPhone;
+        }
+
+        if ($request->has('email')) {
+            $data['email'] = $request->email;
+        }
+        if ($request->has('source')) {
+            $data['source'] = $request->source;
+        }
+        if ($request->has('address')) {
+            $data['address'] = $request->address;
+        }
+        if ($request->has('notes')) {
+            $data['notes'] = $request->notes;
+        }
+        if ($request->has('assigned_user_id')) {
+            $data['assigned_user_id'] = $request->assigned_user_id;
+        }
+
+        if ($request->has('company') || $request->has('company_id')) {
+            $companyVal = $request->input('company_id', $request->input('company'));
+            if ($companyVal === null || $companyVal === '') {
+                $data['company_id'] = null;
+            } elseif (is_numeric($companyVal)) {
+                $data['company_id'] = (int) $companyVal;
+            } else {
+                $data['company_id'] = Company::findOrCreateByName($companyVal);
+            }
+        }
+
+        try {
+            DB::beginTransaction();
+
+            if (!empty($data)) {
+                $customer->update($data);
+            }
+
+            if ($request->has('labels')) {
+                $labelInput = $request->input('labels');
+                $labelIds = [];
+                foreach ($labelInput as $l) {
+                    if (is_numeric($l)) {
+                        $labelIds[] = (int) $l;
+                    } elseif (is_string($l) && !empty(trim($l))) {
+                        $label = Label::firstOrCreate(
+                            ['name' => trim($l)],
+                            ['color' => '#' . substr(md5(trim($l)), 0, 6)]
+                        );
+                        $labelIds[] = $label->id;
+                    }
+                }
+                $customer->labels()->sync($labelIds);
+            }
+
+            DB::commit();
+
+            $customer->load(['labels', 'company', 'assignedUser']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Customer berhasil diperbarui.',
+                'data' => [
+                    'id' => $customer->id,
+                    'name' => $customer->name,
+                    'whatsapp' => $customer->wa_number,
+                    'email' => $customer->email,
+                    'source' => $customer->source ?: 'Unknown',
+                    'address' => $customer->address,
+                    'notes' => $customer->notes,
+                    'company' => $customer->company ? [
+                        'id' => $customer->company->id,
+                        'name' => $customer->company->name,
+                    ] : null,
+                    'assigned_user' => $customer->assignedUser ? [
+                        'id' => $customer->assignedUser->id,
+                        'name' => $customer->assignedUser->name,
+                    ] : null,
+                    'labels' => $customer->labels->map(function ($label) {
+                        return [
+                            'id' => $label->id,
+                            'name' => $label->name,
+                            'color' => $label->color,
+                        ];
+                    }),
+                    'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : null,
+                    'updated_at' => $customer->updated_at ? $customer->updated_at->format('Y-m-d H:i:s') : null,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

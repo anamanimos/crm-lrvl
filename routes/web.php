@@ -229,7 +229,10 @@ require __DIR__.'/auth.php';
 // Public API Routes
 Route::prefix('api')->middleware('api.key')->group(function () {
     Route::get('/customers', [CustomerController::class, 'apiCustomers']);
+    Route::post('/customers', [CustomerController::class, 'apiStore']);
     Route::get('/customers/sources', [CustomerController::class, 'apiCustomers']);
     Route::get('/customers/{id}', [CustomerController::class, 'apiShow']);
+    Route::match(['PUT', 'PATCH', 'POST'], '/customers/{id}', [CustomerController::class, 'apiUpdate']);
+    Route::post('/customers/{id}/update', [CustomerController::class, 'apiUpdate']);
     Route::get('/reports/new-chatters', [ReportController::class, 'apiNewChatters']);
 });
