@@ -93,6 +93,16 @@
                                 
                                 <!--begin::Input group-->
                                 <div class="mb-10">
+                                    <label class="form-label">Sumber / Asal Customer</label>
+                                    <input type="text" name="source" class="form-control mb-2" 
+                                           placeholder="Contoh: Instagram, Website, Iklan Facebook, Referral, dll." 
+                                           value="{{ old('source', $customer->source ?? '') }}" />
+                                    <div class="text-muted fs-7">Darimana kontak/customer ini pertama kali didapatkan.</div>
+                                </div>
+                                <!--end::Input group-->
+                                
+                                <!--begin::Input group-->
+                                <div class="mb-10">
                                     <label class="form-label">Alamat</label>
                                     <textarea name="address" class="form-control mb-2" rows="2" 
                                               placeholder="Alamat customer...">{{ old('address', $customer->address ?? '') }}</textarea>

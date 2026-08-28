@@ -72,6 +72,7 @@ class CustomerController extends Controller
         $request->validate([
             'wa_number' => 'required',
             'name' => 'nullable|string|max:255',
+            'source' => 'nullable|string|max:100',
         ]);
 
         $phone = format_phone($request->wa_number);
@@ -100,6 +101,7 @@ class CustomerController extends Controller
                 'wa_number' => $phone,
                 'name' => $request->name,
                 'email' => $request->email,
+                'source' => $request->source,
                 'address' => $request->address,
                 'notes' => $request->notes,
                 'company_id' => $company_id,
@@ -135,6 +137,7 @@ class CustomerController extends Controller
         $request->validate([
             'wa_number' => 'required',
             'name' => 'nullable|string|max:255',
+            'source' => 'nullable|string|max:100',
         ]);
 
         $phone = format_phone($request->wa_number);
@@ -161,6 +164,7 @@ class CustomerController extends Controller
                 'wa_number' => $phone,
                 'name' => $request->name,
                 'email' => $request->email,
+                'source' => $request->source,
                 'address' => $request->address,
                 'notes' => $request->notes,
                 'company_id' => $company_id,

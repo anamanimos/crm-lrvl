@@ -16,6 +16,7 @@ class Customer extends Model
         'avatar',
         'avatar_last_updated',
         'email',
+        'source',
         'address',
         'dob',
         'gender',

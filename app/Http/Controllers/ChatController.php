@@ -810,6 +810,7 @@ class ChatController extends Controller
             'name' => $customer->name,
             'wa_number' => $customer->wa_number,
             'email' => $customer->email,
+            'source' => $customer->source,
             'address' => $customer->address,
             'assigned_user_name' => $customer->assignedUser ? $customer->assignedUser->name : null,
             'last_chat_at' => $customer->last_chat_at ? $customer->last_chat_at->format('d M Y H:i') : '-',

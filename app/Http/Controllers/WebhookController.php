@@ -173,7 +173,8 @@ class WebhookController extends Controller
                 }
                 $customer = Customer::create([
                     'wa_number' => $senderPhone,
-                    'name' => $formattedName
+                    'name' => $formattedName,
+                    'source' => 'WhatsApp'
                 ]);
             } elseif ($senderName && (empty($customer->name) || str_starts_with($customer->name, 'WA - '))) {
                 $customer->update(['name' => $senderName . ' - ' . $senderPhone]);

@@ -224,11 +224,18 @@
                                                    class="text-gray-800 text-hover-primary fw-bold">
                                                     {{ $customer->name ?: 'Tanpa Nama' }}
                                                 </a>
-                                                @if ($customer->assignedUser)
-                                                <span class="text-muted fs-7">
-                                                    <i class="ki-outline ki-user fs-7"></i> {{ $customer->assignedUser->name }}
-                                                </span>
-                                                @endif
+                                                <div class="d-flex align-items-center flex-wrap gap-2 mt-1">
+                                                    @if ($customer->assignedUser)
+                                                    <span class="text-muted fs-7">
+                                                        <i class="ki-outline ki-user fs-7"></i> {{ $customer->assignedUser->name }}
+                                                    </span>
+                                                    @endif
+                                                    @if ($customer->source)
+                                                    <span class="badge badge-light-info fs-8 py-0 px-2" title="Sumber Customer">
+                                                        <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $customer->source }}
+                                                    </span>
+                                                    @endif
+                                                </div>
                                             </div>
                                         </div>
                                     </td>
