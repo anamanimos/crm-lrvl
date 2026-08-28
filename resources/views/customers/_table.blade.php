@@ -13,7 +13,7 @@
                 <th class="min-w-125px col-customer">Customer</th>
                 <th class="min-w-100px col-company">Perusahaan</th>
                 <th class="min-w-125px col-whatsapp">Nomor WA</th>
-                <th class="min-w-100px col-label">Label</th>
+                <th class="min-w-100px col-source">Source</th>
                 <th class="min-w-100px col-last-chat">Terakhir Chat</th>
                 <th class="text-end min-w-100px col-action">Aksi</th>
             </tr>
@@ -39,10 +39,12 @@
                                     <i class="ki-outline ki-user fs-7"></i> {{ $customer->assignedUser->name }}
                                 </span>
                                 @endif
-                                @if ($customer->source)
-                                <span class="badge badge-light-info fs-8 py-0 px-2" title="Sumber Customer">
-                                    <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $customer->source }}
-                                </span>
+                                @if ($customer->labels->isNotEmpty())
+                                    @foreach ($customer->labels as $label)
+                                    <span class="badge badge-sm py-0 px-2 fs-8" style="background-color: {{ $label->color }}20; color: {{ $label->color }}">
+                                        {{ $label->name }}
+                                    </span>
+                                    @endforeach
                                 @endif
                             </div>
                         </div>
@@ -61,17 +63,15 @@
                         {{ format_phone_display($customer->wa_number) }}
                     </a>
                 </td>
-                <td class="col-label">
-                    @if ($customer->labels->isNotEmpty())
-                    <div class="d-flex flex-wrap gap-1">
-                        @foreach ($customer->labels as $label)
-                        <span class="badge" style="background-color: {{ $label->color }}20; color: {{ $label->color }}">
-                            {{ $label->name }}
+                <td class="col-source">
+                    @if ($customer->source && strtolower($customer->source) !== 'unknown')
+                        <span class="badge badge-light-primary fw-bold fs-7 py-1 px-3">
+                            <i class="ki-outline ki-compass fs-6 me-1 text-primary"></i>{{ $customer->source }}
                         </span>
-                        @endforeach
-                    </div>
                     @else
-                    <span class="text-muted">-</span>
+                        <span class="badge badge-light text-muted fw-semibold fs-7 py-1 px-3">
+                            {{ $customer->source ?: 'Unknown' }}
+                        </span>
                     @endif
                 </td>
                 <td class="col-last-chat">

@@ -210,8 +210,8 @@
                                                     <span class="form-check-label fs-7 text-gray-700">Nomor WA</span>
                                                 </label>
                                                 <label class="form-check form-check-sm form-check-custom form-check-solid">
-                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-label" checked />
-                                                    <span class="form-check-label fs-7 text-gray-700">Label</span>
+                                                    <input class="form-check-input toggle-column-cb" type="checkbox" value="col-source" checked />
+                                                    <span class="form-check-label fs-7 text-gray-700">Source</span>
                                                 </label>
                                                 <label class="form-check form-check-sm form-check-custom form-check-solid">
                                                     <input class="form-check-input toggle-column-cb" type="checkbox" value="col-last-chat" checked />
