@@ -228,5 +228,7 @@ require __DIR__.'/auth.php';
 
 // Public API Routes
 Route::prefix('api')->middleware('api.key')->group(function () {
+    Route::get('/customers', [CustomerController::class, 'apiCustomers']);
+    Route::get('/customers/sources', [CustomerController::class, 'apiCustomers']);
     Route::get('/reports/new-chatters', [ReportController::class, 'apiNewChatters']);
 });

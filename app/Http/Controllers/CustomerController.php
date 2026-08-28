@@ -235,4 +235,48 @@ class CustomerController extends Controller
 
         return response()->json(['results' => $results]);
     }
+
+    /**
+     * Public API: List customers with ID, WhatsApp, Source, and Created At.
+     */
+    public function apiCustomers(Request $request)
+    {
+        $query = Customer::query();
+
+        // Optional filter by source
+        if ($request->filled('source')) {
+            $query->where('source', $request->source);
+        }
+
+        // Optional date range filter
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        // Sorting
+        $query->orderBy('id', 'asc');
+
+        // Optional limit
+        if ($request->filled('limit') && is_numeric($request->limit)) {
+            $customers = $query->limit((int) $request->limit)->get();
+        } else {
+            $customers = $query->get();
+        }
+
+        $data = $customers->map(function ($customer) {
+            return [
+                'id' => $customer->id,
+                'whatsapp' => $customer->wa_number,
+                'source' => $customer->source ?: 'Unknown',
+                'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d') : null,
+            ];
+        });
+
+        return response()->json([
+            'data' => $data,
+        ]);
+    }
 }

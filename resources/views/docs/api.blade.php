@@ -68,7 +68,7 @@
                                         <i class="ki-outline ki-link fs-2 text-primary me-3"></i>
                                         <div>
                                             <span class="fw-bold text-gray-800 me-2">Base URL:</span>
-                                            <code class="text-primary fw-bold">{{ url('/api/v1/') }}</code>
+                                            <code class="text-primary fw-bold">{{ url('/api') }}</code>
                                         </div>
                                     </div>
                                 </div>
@@ -102,7 +102,7 @@
                                         <span class="badge badge-light-primary fw-bold fs-4 py-2 px-4 me-4">GET</span>
                                         <h3 class="text-gray-800 fw-bold fs-3 m-0">/customers</h3>
                                     </div>
-                                    <p class="text-gray-600 mb-6">Mengambil daftar customer dengan pagination dan filter.</p>
+                                    <p class="text-gray-600 mb-6">Mengambil daftar customer beserta informasi nomor WhatsApp, sumber (source), dan tanggal pembuatan.</p>
                                     
                                     <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Query Parameters</h4>
                                     <div class="table-responsive mb-8">
@@ -116,19 +116,24 @@
                                             </thead>
                                             <tbody>
                                                 <tr>
-                                                    <td class="ps-4"><code>search</code></td>
+                                                    <td class="ps-4"><code>source</code></td>
                                                     <td><span class="badge badge-light">string</span></td>
-                                                    <td>Pencarian berdasarkan nama atau nomor telepon</td>
+                                                    <td>Filter berdasarkan sumber customer (cth: <code>Instagram</code>, <code>TikTok</code>, <code>Website</code>, <code>Unknown</code>)</td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="ps-4"><code>label_id</code></td>
-                                                    <td><span class="badge badge-light">int</span></td>
-                                                    <td>Filter berdasarkan ID Label</td>
+                                                    <td class="ps-4"><code>start_date</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>Filter tanggal awal dibuat (format: <code>YYYY-MM-DD</code>, opsional)</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="ps-4"><code>end_date</code></td>
+                                                    <td><span class="badge badge-light">string</span></td>
+                                                    <td>Filter tanggal akhir dibuat (format: <code>YYYY-MM-DD</code>, opsional)</td>
                                                 </tr>
                                                 <tr>
                                                     <td class="ps-4"><code>limit</code></td>
                                                     <td><span class="badge badge-light">int</span></td>
-                                                    <td>Jumlah data per halaman (default: 50)</td>
+                                                    <td>Batasi jumlah data yang diambil (opsional)</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -136,18 +141,20 @@
 
                                     <h4 class="text-gray-500 fw-bold fs-7 text-uppercase mb-3">Response</h4>
                                     <pre class="bg-gray-900 rounded p-6 text-success fs-7"><code>{
-  "status": true,
-  "data": {
-    "customers": [
-      {
-        "id": 1,
-        "uuid": "550e8400-e29b-41d4-a716-446655440000",
-        "wa_number": "628123456789",
-        "name": "John Doe"
-      }
-    ],
-    "total": 1
-  }
+  "data": [
+    {
+      "id": 1023,
+      "whatsapp": "628113780819",
+      "source": "Instagram",
+      "created_at": "2026-08-03"
+    },
+    {
+      "id": 1024,
+      "whatsapp": "628567xxxxx",
+      "source": "Website",
+      "created_at": "2026-08-04"
+    }
+  ]
 }</code></pre>
                                 </div>
 
