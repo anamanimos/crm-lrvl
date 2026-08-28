@@ -24,7 +24,7 @@ class ArchiveInvalidCustomers extends Command
      *
      * @var string
      */
-    protected $description = 'Soft delete / arsipkan data customer dengan nomor WhatsApp tidak valid atau terlalu pendek (indikasi manipulasi KPI CS)';
+    protected $description = 'Soft delete / arsipkan data customer dengan nomor WhatsApp tidak valid, dummy NA_, mengandung huruf, atau terlalu pendek (indikasi manipulasi KPI CS)';
 
     /**
      * Execute the console command.
@@ -75,9 +75,13 @@ class ArchiveInvalidCustomers extends Command
         }
 
         $query->where(function ($q) use ($minDigits, $isStrict) {
-            // Nomor pendek atau nomor dummy umum
-            $q->whereRaw("LENGTH(TRIM(wa_number)) < ?", [$minDigits])
+            // 1. Nomor mengandung huruf, simbol, atau string dummy NA_ (bukan murni angka)
+            $q->whereRaw("wa_number REGEXP '[^0-9]'")
+              // 2. Nomor terlalu pendek (< 10 digit)
+              ->orWhereRaw("LENGTH(TRIM(wa_number)) < ?", [$minDigits])
+              // 3. Nomor dummy umum
               ->orWhereIn('wa_number', ['0', '62', '620', '6200', '62000', '62123', '621234', '6212345'])
+              // 4. Prefiks non-seluler di Indonesia
               ->orWhere('wa_number', 'LIKE', '620%')
               ->orWhere('wa_number', 'LIKE', '621%')
               ->orWhere('wa_number', 'LIKE', '627%');
@@ -109,7 +113,7 @@ class ArchiveInvalidCustomers extends Command
                     $c->id,
                     $c->name ?: '(Tanpa Nama)',
                     $c->wa_number,
-                    strlen(trim($c->wa_number)) . ' digit',
+                    strlen(trim($c->wa_number)) . ' char',
                     $c->is_archived ? 'Sudah Arsip' : 'Aktif',
                     $c->source ?: 'Unknown',
                     $c->assignedUser ? $c->assignedUser->name : '-',
