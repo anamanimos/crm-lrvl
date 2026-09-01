@@ -365,6 +365,7 @@ class CustomerController extends Controller
         $data = $customers->map(function ($customer) {
             return [
                 'id' => $customer->id,
+                'name' => $customer->name,
                 'whatsapp' => $customer->wa_number,
                 'source' => $customer->source ?: 'Unknown',
                 'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d') : null,
@@ -716,28 +717,47 @@ class CustomerController extends Controller
      */
     public function apiSources(Request $request)
     {
-        // Get customer count grouped by source
-        $customerCounts = Customer::select('source', DB::raw('count(*) as total'))
+        // Get customer count grouped by source with optional date filters
+        $query = Customer::select('source', DB::raw('count(*) as total'))
             ->whereNotNull('source')
-            ->where('source', '!=', '')
-            ->groupBy('source')
+            ->where('source', '!=', '');
+
+        if ($request->filled('start_date')) {
+            $query->whereDate('created_at', '>=', $request->start_date);
+        }
+        if ($request->filled('end_date')) {
+            $query->whereDate('created_at', '<=', $request->end_date);
+        }
+
+        $customerCounts = $query->groupBy('source')
             ->pluck('total', 'source')
             ->toArray();
 
         // Get defined sources from ChatSourceRule and default list
         $ruleSources = ChatSourceRule::pluck('source_name')->toArray();
-        $defaultSources = ['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'];
+        $defaultSources = ['Tiktok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'];
 
-        $allSourceNames = collect(array_keys($customerCounts))
-            ->merge($ruleSources)
-            ->merge($defaultSources)
-            ->unique()
-            ->values();
+        $sourceMap = [];
+        foreach (array_merge(array_keys($customerCounts), $ruleSources, $defaultSources) as $s) {
+            $trimmed = trim($s);
+            if (!empty($trimmed)) {
+                $lower = strtolower($trimmed);
+                if (!isset($sourceMap[$lower])) {
+                    $sourceMap[$lower] = $trimmed;
+                }
+            }
+        }
 
-        $data = $allSourceNames->map(function ($name) use ($customerCounts) {
+        $data = collect($sourceMap)->map(function ($canonicalName, $lower) use ($customerCounts) {
+            $total = 0;
+            foreach ($customerCounts as $cSource => $cTotal) {
+                if (strtolower(trim($cSource)) === $lower) {
+                    $total += (int) $cTotal;
+                }
+            }
             return [
-                'name' => $name,
-                'total_customers' => $customerCounts[$name] ?? 0,
+                'name' => $canonicalName,
+                'total_customers' => $total,
             ];
         })->sortByDesc('total_customers')->values();
 
