@@ -87,18 +87,20 @@
                                                 @endif
                                             </td>
                                             <td>{{ $key->created_at->format('d M Y') }}</td>
-                                            <td class="text-end">
-                                                <button type="button" class="btn btn-sm btn-icon btn-light-{{ $key->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
-                                                    id="btn-toggle-{{ $key->id }}"
-                                                    onclick="toggleKeyStatus({{ $key->id }}, '{{ route('api-keys.toggle-status', $key->id) }}')" 
-                                                    title="{{ $key->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                                    <i class="ki-outline {{ $key->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                                    onclick="deleteKey({{ $key->id }}, '{{ route('api-keys.destroy', $key->id) }}')" 
-                                                    title="Hapus">
-                                                    <i class="ki-outline ki-trash fs-3"></i>
-                                                </button>
+                                            <td class="text-end text-nowrap">
+                                                <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                                    <button type="button" class="btn btn-icon btn-light-{{ $key->is_active ? 'warning' : 'success' }} btn-sm btn-toggle-status" 
+                                                        id="btn-toggle-{{ $key->id }}"
+                                                        onclick="toggleKeyStatus({{ $key->id }}, '{{ route('api-keys.toggle-status', $key->id) }}')" 
+                                                        title="{{ $key->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                                        <i class="ki-outline {{ $key->is_active ? 'ki-cross' : 'ki-check' }} fs-4"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-icon btn-light-danger btn-sm" 
+                                                        onclick="deleteKey({{ $key->id }}, '{{ route('api-keys.destroy', $key->id) }}')" 
+                                                        title="Hapus">
+                                                        <i class="ki-outline ki-trash fs-5"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                         @empty
@@ -230,18 +232,20 @@
                             <span class="badge badge-light-success">Aktif</span>
                         </td>
                         <td>${d.created_at}</td>
-                        <td class="text-end">
-                            <button type="button" class="btn btn-sm btn-icon btn-light-warning me-2 btn-toggle-status" 
-                                id="btn-toggle-${d.id}"
-                                onclick="toggleKeyStatus(${d.id}, '${d.toggle_url}')" 
-                                title="Nonaktifkan">
-                                <i class="ki-outline ki-cross fs-3"></i>
-                            </button>
-                            <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                onclick="deleteKey(${d.id}, '${d.destroy_url}')" 
-                                title="Hapus">
-                                <i class="ki-outline ki-trash fs-3"></i>
-                            </button>
+                        <td class="text-end text-nowrap">
+                            <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                <button type="button" class="btn btn-icon btn-light-warning btn-sm btn-toggle-status" 
+                                    id="btn-toggle-${d.id}"
+                                    onclick="toggleKeyStatus(${d.id}, '${d.toggle_url}')" 
+                                    title="Nonaktifkan">
+                                    <i class="ki-outline ki-cross fs-4"></i>
+                                </button>
+                                <button type="button" class="btn btn-icon btn-light-danger btn-sm" 
+                                    onclick="deleteKey(${d.id}, '${d.destroy_url}')" 
+                                    title="Hapus">
+                                    <i class="ki-outline ki-trash fs-5"></i>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 `;

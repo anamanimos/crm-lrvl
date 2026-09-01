@@ -82,8 +82,8 @@
                                             <th>Kata Kunci / Pola</th>
                                             <th>Metode</th>
                                             <th>Hasil Sumber (Source)</th>
-                                            <th>Status</th>
-                                            <th class="text-end min-w-100px">Aksi</th>
+                                            <th class="min-w-80px">Status</th>
+                                            <th class="text-end min-w-125px text-nowrap">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="text-gray-600 fw-semibold" id="rules_tbody">
@@ -118,23 +118,25 @@
                                                     <span class="badge badge-light-danger">Nonaktif</span>
                                                 @endif
                                             </td>
-                                            <td class="text-end">
-                                                <button type="button" class="btn btn-sm btn-icon btn-light-primary me-2" 
-                                                    onclick="openEditModal({{ $rule->id }})" 
-                                                    title="Edit">
-                                                    <i class="ki-outline ki-pencil fs-4"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-icon btn-light-{{ $rule->is_active ? 'warning' : 'success' }} me-2 btn-toggle-status" 
-                                                    id="btn-toggle-{{ $rule->id }}"
-                                                    onclick="toggleRuleStatus({{ $rule->id }}, '{{ route('chat-sources.toggle-status', $rule->id) }}')" 
-                                                    title="{{ $rule->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
-                                                    <i class="ki-outline {{ $rule->is_active ? 'ki-cross' : 'ki-check' }} fs-3"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                                    onclick="deleteRule({{ $rule->id }}, '{{ route('chat-sources.destroy', $rule->id) }}')" 
-                                                    title="Hapus">
-                                                    <i class="ki-outline ki-trash fs-3"></i>
-                                                </button>
+                                            <td class="text-end text-nowrap">
+                                                <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                                    <button type="button" class="btn btn-icon btn-light-primary btn-sm" 
+                                                        onclick="openEditModal({{ $rule->id }})" 
+                                                        title="Edit">
+                                                        <i class="ki-outline ki-pencil fs-5"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-icon btn-light-{{ $rule->is_active ? 'warning' : 'success' }} btn-sm btn-toggle-status" 
+                                                        id="btn-toggle-{{ $rule->id }}"
+                                                        onclick="toggleRuleStatus({{ $rule->id }}, '{{ route('chat-sources.toggle-status', $rule->id) }}')" 
+                                                        title="{{ $rule->is_active ? 'Nonaktifkan' : 'Aktifkan' }}">
+                                                        <i class="ki-outline {{ $rule->is_active ? 'ki-cross' : 'ki-check' }} fs-4"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-icon btn-light-danger btn-sm" 
+                                                        onclick="deleteRule({{ $rule->id }}, '{{ route('chat-sources.destroy', $rule->id) }}')" 
+                                                        title="Hapus">
+                                                        <i class="ki-outline ki-trash fs-5"></i>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                         @empty
@@ -327,23 +329,25 @@
                                 <td id="status-col-${d.id}">
                                     <span class="badge badge-light-success">Aktif</span>
                                 </td>
-                                <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-icon btn-light-primary me-2" 
-                                        onclick="openEditModal(${d.id})" 
-                                        title="Edit">
-                                        <i class="ki-outline ki-pencil fs-4"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-icon btn-light-warning me-2 btn-toggle-status" 
-                                        id="btn-toggle-${d.id}"
-                                        onclick="toggleRuleStatus(${d.id}, '${d.toggle_url}')" 
-                                        title="Nonaktifkan">
-                                        <i class="ki-outline ki-cross fs-3"></i>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-icon btn-light-danger" 
-                                        onclick="deleteRule(${d.id}, '${d.destroy_url}')" 
-                                        title="Hapus">
-                                        <i class="ki-outline ki-trash fs-3"></i>
-                                    </button>
+                                <td class="text-end text-nowrap">
+                                    <div class="d-inline-flex align-items-center justify-content-end gap-2">
+                                        <button type="button" class="btn btn-icon btn-light-primary btn-sm" 
+                                            onclick="openEditModal(${d.id})" 
+                                            title="Edit">
+                                            <i class="ki-outline ki-pencil fs-5"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-icon btn-light-warning btn-sm btn-toggle-status" 
+                                            id="btn-toggle-${d.id}"
+                                            onclick="toggleRuleStatus(${d.id}, '${d.toggle_url}')" 
+                                            title="Nonaktifkan">
+                                            <i class="ki-outline ki-cross fs-4"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-icon btn-light-danger btn-sm" 
+                                            onclick="deleteRule(${d.id}, '${d.destroy_url}')" 
+                                            title="Hapus">
+                                            <i class="ki-outline ki-trash fs-5"></i>
+                                        </button>
+                                    </div>
                                 </td>
                             </tr>
                         `;
@@ -393,14 +397,14 @@
 
                     if (res.is_active) {
                         statusCol.innerHTML = '<span class="badge badge-light-success">Aktif</span>';
-                        toggleBtn.className = 'btn btn-sm btn-icon btn-light-warning me-2 btn-toggle-status';
+                        toggleBtn.className = 'btn btn-icon btn-light-warning btn-sm btn-toggle-status';
                         toggleBtn.title = 'Nonaktifkan';
-                        toggleBtn.innerHTML = '<i class="ki-outline ki-cross fs-3"></i>';
+                        toggleBtn.innerHTML = '<i class="ki-outline ki-cross fs-4"></i>';
                     } else {
                         statusCol.innerHTML = '<span class="badge badge-light-danger">Nonaktif</span>';
-                        toggleBtn.className = 'btn btn-sm btn-icon btn-light-success me-2 btn-toggle-status';
+                        toggleBtn.className = 'btn btn-icon btn-light-success btn-sm btn-toggle-status';
                         toggleBtn.title = 'Aktifkan';
-                        toggleBtn.innerHTML = '<i class="ki-outline ki-check fs-3"></i>';
+                        toggleBtn.innerHTML = '<i class="ki-outline ki-check fs-4"></i>';
                     }
 
                     Swal.fire({
