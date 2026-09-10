@@ -12,13 +12,13 @@ class OidcController extends Controller
 {
     public function redirect()
     {
-        return Socialite::driver('oidc')->redirect();
+        return Socialite::driver('oidc')->stateless()->redirect();
     }
 
     public function callback()
     {
         try {
-            $socialUser = Socialite::driver('oidc')->user();
+            $socialUser = Socialite::driver('oidc')->stateless()->user();
             
             \Illuminate\Support\Facades\Log::info('OIDC Social User Data:', [
                 'id' => $socialUser->getId(),
@@ -73,8 +73,7 @@ class OidcController extends Controller
                 'exception' => $e,
                 'request' => request()->all()
             ]);
-            // return redirect()->route('login')->with('error', 'Authentication failed: ' . $e->getMessage());
-            dd('SSO Login Failed', $e->getMessage(), $e->getTraceAsString(), request()->all());
+            return redirect()->route('login')->with('error', 'Gagal login melalui SSO: ' . $e->getMessage());
         }
     }
 
