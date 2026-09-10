@@ -18,6 +18,56 @@
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <style>
+        .app-sidebar-logo {
+            display: flex !important;
+            align-items: center !important;
+            position: relative !important;
+        }
+        .app-sidebar-logo a.crm-logo-wrapper {
+            display: flex !important;
+            align-items: center !important;
+            text-decoration: none !important;
+            max-width: calc(100% - 24px) !important;
+            overflow: hidden !important;
+        }
+        .crm-brand-icon {
+            width: 36px !important;
+            height: 36px !important;
+            min-width: 36px !important;
+            max-width: 36px !important;
+            max-height: 36px !important;
+            object-fit: contain !important;
+            flex-shrink: 0 !important;
+        }
+        .crm-brand-text-container {
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            line-height: 1.15 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+        }
+        .crm-brand-title-main {
+            font-size: 0.95rem !important;
+            font-weight: 800 !important;
+            color: #0F172A !important;
+            letter-spacing: -0.2px !important;
+            white-space: nowrap !important;
+        }
+        [data-bs-theme="dark"] .crm-brand-title-main {
+            color: #F8FAFC !important;
+        }
+        .crm-brand-title-sub {
+            font-size: 0.72rem !important;
+            font-weight: 700 !important;
+            color: #0284C7 !important;
+            letter-spacing: 0.5px !important;
+            text-transform: uppercase !important;
+            white-space: nowrap !important;
+        }
+    </style>
+
     <script>
         var appUrl = "{{ url('/') }}";
         if (window.top != window.self) {
@@ -161,9 +211,11 @@
                 <div id="kt_app_sidebar" class="app-sidebar flex-column" data-kt-drawer="true" data-kt-drawer-name="app-sidebar" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
                     <!--begin::Logo-->
                     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
-                        <a href="{{ route('dashboard') }}" class="d-flex align-items-center gap-2">
-                            <img src="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" class="h-32px" alt="CRM Logo" />
-                            <span class="fs-4 fw-bolder text-primary app-sidebar-logo-default">CRM DAMAI JAYA</span>
+                        <a href="{{ route('dashboard') }}" class="crm-logo-wrapper">
+                            <img src="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" class="crm-brand-icon me-3" alt="CRM Logo" />
+                            <div class="crm-brand-text-container app-sidebar-logo-default">
+                                <span class="crm-brand-title-main">CRM DAMAI JAYA</span>
+                            </div>
                             <span class="fs-4 fw-bolder text-primary app-sidebar-logo-minimize">CRM</span>
                         </a>
                         <div id="kt_app_sidebar_toggle" class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary h-30px w-30px position-absolute top-50 start-100 translate-middle rotate" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="app-sidebar-minimize">

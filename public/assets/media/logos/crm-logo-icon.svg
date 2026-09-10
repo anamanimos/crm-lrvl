@@ -1,84 +1,76 @@
 ﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
-    <!-- Background Gradient -->
-    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0F172A" />
-      <stop offset="50%" stop-color="#1E293B" />
-      <stop offset="100%" stop-color="#020617" />
-    </linearGradient>
-
-    <!-- Border Glow -->
-    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00D2FF" stop-opacity="0.8" />
-      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.3" />
-      <stop offset="100%" stop-color="#10B981" stop-opacity="0.8" />
-    </linearGradient>
-
-    <!-- Chat Bubble & Loop Gradient -->
-    <linearGradient id="bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#00E5FF" />
-      <stop offset="45%" stop-color="#0284C7" />
+    <!-- Vibrant Multi-stop Gradients -->
+    <linearGradient id="crmBubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0284C7" />
       <stop offset="100%" stop-color="#10B981" />
     </linearGradient>
 
-    <!-- Growth Arrow Gradient -->
-    <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+    <linearGradient id="crmArrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
       <stop offset="0%" stop-color="#0284C7" />
-      <stop offset="50%" stop-color="#00E5FF" />
-      <stop offset="100%" stop-color="#34D399" />
+      <stop offset="50%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#10B981" />
     </linearGradient>
 
-    <!-- Glow Filter -->
-    <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="8" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    <linearGradient id="crmNodeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <!-- Subtle Drop Shadow Filter -->
+    <filter id="softShadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="12" flood-color="#0284C7" flood-opacity="0.25" />
     </filter>
   </defs>
 
-  <!-- App Icon Squircle Base -->
-  <rect x="16" y="16" width="480" height="480" rx="112" ry="112" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="5" />
-
-  <!-- Grid Tech Texture (Subtle) -->
-  <path d="M128 64 V448 M256 64 V448 M384 64 V448 M64 128 H448 M64 256 H448 M64 384 H448" stroke="#334155" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="4 6" />
-
-  <!-- Main CRM Icon Group with Glow -->
-  <g filter="url(#glowEffect)">
-    <!-- Outer Chat Loop -->
-    <path d="M256 104 C172 104 104 172 104 256 C104 290 115 321 134 346 L112 408 L180 390 C203 402 229 408 256 408 C340 408 408 340 408 256 C408 172 340 104 256 104 Z" 
+  <!-- Main Container with Drop Shadow (No ugly solid background block) -->
+  <g filter="url(#softShadow)">
+    <!-- WhatsApp / Chat Bubble Contour -->
+    <path d="M256 70 C154 70 72 152 72 254 C72 288 81 319 98 347 L80 416 L154 398 C183 418 218 430 256 430 C358 430 440 348 440 254 C440 152 358 70 256 70 Z" 
           fill="none" 
-          stroke="url(#bubbleGrad)" 
-          stroke-width="28" 
+          stroke="url(#crmBubbleGrad)" 
+          stroke-width="32" 
           stroke-linecap="round" 
           stroke-linejoin="round" />
 
-    <!-- Connected CRM Leads & Pipeline Nodes Inside -->
-    <path d="M190 270 L240 220 L300 260 L350 180" 
+    <!-- Connected Growth Path -->
+    <path d="M165 295 L225 235 L285 275 L345 185" 
           fill="none" 
-          stroke="url(#arrowGrad)" 
-          stroke-width="20" 
+          stroke="url(#crmArrowGrad)" 
+          stroke-width="24" 
           stroke-linecap="round" 
           stroke-linejoin="round" />
 
-    <!-- Dynamic Growth Arrowhead -->
-    <polygon points="350,150 375,200 325,190" fill="#34D399" />
+    <!-- Ascending Arrow Head -->
+    <polygon points="340,150 375,200 320,195" fill="#10B981" stroke="#10B981" stroke-width="4" stroke-linejoin="round" />
 
-    <!-- Connection Network Struts -->
-    <line x1="190" y1="270" x2="220" y2="330" stroke="#00E5FF" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
-    <line x1="240" y1="220" x2="280" y2="180" stroke="#00E5FF" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
-    <line x1="300" y1="260" x2="320" y2="330" stroke="#34D399" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
+    <!-- Network Interconnect Dotted Lines -->
+    <line x1="165" y1="295" x2="205" y2="360" stroke="#00D2FF" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 8" stroke-opacity="0.7" />
+    <line x1="225" y1="235" x2="275" y2="185" stroke="#0284C7" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 8" stroke-opacity="0.7" />
+    <line x1="285" y1="275" x2="315" y2="350" stroke="#10B981" stroke-width="8" stroke-linecap="round" stroke-dasharray="4 8" stroke-opacity="0.7" />
 
-    <!-- Network Glowing Nodes -->
-    <circle cx="190" cy="270" r="16" fill="#00E5FF" />
-    <circle cx="190" cy="270" r="8" fill="#FFFFFF" />
+    <!-- Lead / Customer Network Glowing Nodes -->
+    <!-- Node 1 -->
+    <circle cx="165" cy="295" r="20" fill="url(#crmNodeGrad)" />
+    <circle cx="165" cy="295" r="10" fill="#FFFFFF" />
 
-    <circle cx="240" cy="220" r="16" fill="#0284C7" />
-    <circle cx="240" cy="220" r="8" fill="#FFFFFF" />
+    <!-- Node 2 -->
+    <circle cx="225" cy="235" r="20" fill="url(#crmNodeGrad)" />
+    <circle cx="225" cy="235" r="10" fill="#FFFFFF" />
 
-    <circle cx="300" cy="260" r="16" fill="#10B981" />
-    <circle cx="300" cy="260" r="8" fill="#FFFFFF" />
+    <!-- Node 3 -->
+    <circle cx="285" cy="275" r="20" fill="url(#crmNodeGrad)" />
+    <circle cx="285" cy="275" r="10" fill="#FFFFFF" />
 
-    <circle cx="220" cy="330" r="10" fill="#00E5FF" fill-opacity="0.8" />
-    <circle cx="280" cy="180" r="10" fill="#00E5FF" fill-opacity="0.8" />
-    <circle cx="320" cy="330" r="10" fill="#34D399" fill-opacity="0.8" />
+    <!-- Sub-Nodes -->
+    <circle cx="205" cy="360" r="13" fill="#00D2FF" />
+    <circle cx="205" cy="360" r="6" fill="#FFFFFF" />
+
+    <circle cx="275" cy="185" r="13" fill="#0284C7" />
+    <circle cx="275" cy="185" r="6" fill="#FFFFFF" />
+
+    <circle cx="315" cy="350" r="13" fill="#10B981" />
+    <circle cx="315" cy="350" r="6" fill="#FFFFFF" />
   </g>
 </svg>
