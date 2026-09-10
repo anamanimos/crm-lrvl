@@ -42,6 +42,10 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerateToken();
 
         $logoutUrl = config('services.oidc.logout_url');
+        if (empty($logoutUrl) && config('services.oidc.base_url')) {
+            $logoutUrl = rtrim(config('services.oidc.base_url'), '/') . '/logout';
+        }
+
         if ($logoutUrl && $user && !empty($user->oidc_sub)) {
             $redirectUri = url('/');
             // Build logout URL with redirect back
