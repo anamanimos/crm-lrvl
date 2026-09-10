@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <title>{{ $title ?? 'CRM SEVENCOLS' }}</title>
+    <title>{{ $title ?? 'CRM DAMAI JAYA' }}</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="{{ asset('assets/favicon.ico') }}" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" />
+    <link rel="shortcut icon" href="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" />
     
     <!--begin::Fonts(mandatory for all pages)-->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
@@ -67,7 +68,8 @@
 
                     <!--begin::Mobile logo-->
                     <div class="d-flex align-items-center flex-grow-1 flex-lg-grow-0">
-                        <a href="{{ route('dashboard') }}" class="d-lg-none">
+                        <a href="{{ route('dashboard') }}" class="d-lg-none d-flex align-items-center gap-2">
+                            <img src="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" class="h-28px" alt="CRM Logo" />
                             <span class="fs-4 fw-bold text-primary">CRM</span>
                         </a>
                     </div>
@@ -159,9 +161,10 @@
                 <div id="kt_app_sidebar" class="app-sidebar flex-column" data-kt-drawer="true" data-kt-drawer-name="app-sidebar" data-kt-drawer-activate="{default: true, lg: false}" data-kt-drawer-overlay="true" data-kt-drawer-width="225px" data-kt-drawer-direction="start" data-kt-drawer-toggle="#kt_app_sidebar_mobile_toggle">
                     <!--begin::Logo-->
                     <div class="app-sidebar-logo px-6" id="kt_app_sidebar_logo">
-                        <a href="{{ route('dashboard') }}" class="d-flex align-items-center">
-                            <span class="fs-3 fw-bold text-primary app-sidebar-logo-default">CRM SEVENCOLS</span>
-                            <span class="fs-4 fw-bold text-primary app-sidebar-logo-minimize">CRM</span>
+                        <a href="{{ route('dashboard') }}" class="d-flex align-items-center gap-2">
+                            <img src="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" class="h-32px" alt="CRM Logo" />
+                            <span class="fs-4 fw-bolder text-primary app-sidebar-logo-default">CRM DAMAI JAYA</span>
+                            <span class="fs-4 fw-bolder text-primary app-sidebar-logo-minimize">CRM</span>
                         </a>
                         <div id="kt_app_sidebar_toggle" class="app-sidebar-toggle btn btn-icon btn-shadow btn-sm btn-color-muted btn-active-color-primary h-30px w-30px position-absolute top-50 start-100 translate-middle rotate" data-kt-toggle="true" data-kt-toggle-state="active" data-kt-toggle-target="body" data-kt-toggle-name="app-sidebar-minimize">
                             <i class="ki-outline ki-black-left-line fs-3 rotate-180"></i>
@@ -217,7 +220,7 @@
                         <div class="app-container container-fluid d-flex flex-column flex-md-row flex-center flex-md-stack py-3">
                             <div class="text-gray-900 order-2 order-md-1">
                                 <span class="text-muted fw-semibold me-1">{{ date('Y') }} &copy;</span>
-                                <a href="#" target="_blank" class="text-gray-800 text-hover-primary">SEVENCOLS Konveksi</a>
+                                <a href="#" target="_blank" class="text-gray-800 text-hover-primary">CRM Damai Jaya</a>
                             </div>
                         </div>
                     </div>

@@ -1,0 +1,84 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="50%" stop-color="#1E293B" />
+      <stop offset="100%" stop-color="#020617" />
+    </linearGradient>
+
+    <!-- Border Glow -->
+    <linearGradient id="borderGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" stop-opacity="0.8" />
+      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.3" />
+      <stop offset="100%" stop-color="#10B981" stop-opacity="0.8" />
+    </linearGradient>
+
+    <!-- Chat Bubble & Loop Gradient -->
+    <linearGradient id="bubbleGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="45%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#10B981" />
+    </linearGradient>
+
+    <!-- Growth Arrow Gradient -->
+    <linearGradient id="arrowGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="50%" stop-color="#00E5FF" />
+      <stop offset="100%" stop-color="#34D399" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="glowEffect" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- App Icon Squircle Base -->
+  <rect x="16" y="16" width="480" height="480" rx="112" ry="112" fill="url(#bgGrad)" stroke="url(#borderGrad)" stroke-width="5" />
+
+  <!-- Grid Tech Texture (Subtle) -->
+  <path d="M128 64 V448 M256 64 V448 M384 64 V448 M64 128 H448 M64 256 H448 M64 384 H448" stroke="#334155" stroke-width="1" stroke-opacity="0.25" stroke-dasharray="4 6" />
+
+  <!-- Main CRM Icon Group with Glow -->
+  <g filter="url(#glowEffect)">
+    <!-- Outer Chat Loop -->
+    <path d="M256 104 C172 104 104 172 104 256 C104 290 115 321 134 346 L112 408 L180 390 C203 402 229 408 256 408 C340 408 408 340 408 256 C408 172 340 104 256 104 Z" 
+          fill="none" 
+          stroke="url(#bubbleGrad)" 
+          stroke-width="28" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Connected CRM Leads & Pipeline Nodes Inside -->
+    <path d="M190 270 L240 220 L300 260 L350 180" 
+          fill="none" 
+          stroke="url(#arrowGrad)" 
+          stroke-width="20" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+
+    <!-- Dynamic Growth Arrowhead -->
+    <polygon points="350,150 375,200 325,190" fill="#34D399" />
+
+    <!-- Connection Network Struts -->
+    <line x1="190" y1="270" x2="220" y2="330" stroke="#00E5FF" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
+    <line x1="240" y1="220" x2="280" y2="180" stroke="#00E5FF" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
+    <line x1="300" y1="260" x2="320" y2="330" stroke="#34D399" stroke-width="6" stroke-opacity="0.6" stroke-dasharray="4 4" />
+
+    <!-- Network Glowing Nodes -->
+    <circle cx="190" cy="270" r="16" fill="#00E5FF" />
+    <circle cx="190" cy="270" r="8" fill="#FFFFFF" />
+
+    <circle cx="240" cy="220" r="16" fill="#0284C7" />
+    <circle cx="240" cy="220" r="8" fill="#FFFFFF" />
+
+    <circle cx="300" cy="260" r="16" fill="#10B981" />
+    <circle cx="300" cy="260" r="8" fill="#FFFFFF" />
+
+    <circle cx="220" cy="330" r="10" fill="#00E5FF" fill-opacity="0.8" />
+    <circle cx="280" cy="180" r="10" fill="#00E5FF" fill-opacity="0.8" />
+    <circle cx="320" cy="330" r="10" fill="#34D399" fill-opacity="0.8" />
+  </g>
+</svg>

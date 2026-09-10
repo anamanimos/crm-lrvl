@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 <head>
-    <title>Login - CRM SEVENCOLS</title>
+    <title>Login - CRM DAMAI JAYA</title>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" href="{{ asset('assets/favicon.ico') }}" />
+    <link rel="icon" type="image/svg+xml" href="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" />
+    <link rel="shortcut icon" href="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
     <link href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" rel="stylesheet" type="text/css" />
     <link href="{{ asset('assets/css/style.bundle.css') }}" rel="stylesheet" type="text/css" />
@@ -15,10 +16,11 @@
         <div class="d-flex flex-column flex-lg-row flex-column-fluid">
             <!-- Left Side - Branding -->
             <div class="d-flex flex-lg-row-fluid w-lg-50 bgi-size-cover bgi-position-center" 
-                 style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                 style="background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);">
                 <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
-                    <a href="/" class="mb-12">
-                        <h1 class="text-white fs-2qx fw-bold">CRM SEVENCOLS</h1>
+                    <a href="/" class="mb-6 d-flex flex-column align-items-center text-decoration-none">
+                        <img src="{{ asset('assets/media/logos/crm-logo-icon.svg') }}" class="h-80px mb-4" alt="CRM Damai Jaya Logo" />
+                        <h1 class="text-white fs-2qx fw-bold">CRM DAMAI JAYA</h1>
                     </a>
                     <h1 class="d-none d-lg-block text-white fs-2qx fw-bold text-center mb-7">
                         Customer Relationship Management
@@ -106,7 +108,7 @@
                 
                 <div class="w-lg-500px d-flex flex-stack px-10 mx-auto">
                     <div class="d-flex fw-semibold text-primary fs-base gap-5">
-                        <span class="text-gray-500">{{ date('Y') }} &copy; SEVENCOLS Konveksi</span>
+                        <span class="text-gray-500">{{ date('Y') }} &copy; CRM Damai Jaya</span>
                     </div>
                 </div>
             </div>
