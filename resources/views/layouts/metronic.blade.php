@@ -136,7 +136,7 @@
                             <div class="app-navbar-item ms-1 ms-md-3">
                                 <a href="{{ route('settings.section', ['section' => 'whatsapp', 'subsection' => 'koneksi']) }}" 
                                    id="header_wa_status_badge" 
-                                   class="btn btn-sm btn-custom btn-active-light d-flex align-items-center gap-2 py-1 px-3 border border-secondary border-opacity-25 rounded-pill" 
+                                   class="d-flex align-items-center gap-2 py-2 px-4 border border-secondary border-opacity-25 rounded-pill bg-light text-hover-primary transition-all" 
                                    data-bs-toggle="tooltip" 
                                    data-bs-placement="bottom" 
                                    data-bs-html="true"
@@ -328,14 +328,14 @@
             if (!badge) return;
 
             const updateHeaderWaBadge = (status, user = '') => {
-                badge.classList.remove('btn-light-success', 'btn-light-danger', 'btn-light-warning', 'btn-light', 'border-success', 'border-danger', 'border-secondary');
+                badge.classList.remove('bg-light-success', 'bg-light-danger', 'bg-light-warning', 'bg-light', 'border-success', 'border-danger', 'border-secondary');
                 dot.classList.remove('bg-success', 'bg-danger', 'bg-warning');
                 pulse.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'd-none');
                 icon.classList.remove('text-success', 'text-danger', 'text-warning', 'text-muted', 'ki-whatsapp', 'ki-disconnect');
                 text.classList.remove('text-success', 'text-danger', 'text-warning', 'text-muted');
 
                 if (status === 'connected') {
-                    badge.classList.add('btn-light-success', 'border-success');
+                    badge.classList.add('bg-light-success', 'border-success');
                     dot.classList.add('bg-success');
                     pulse.classList.add('bg-success');
                     icon.classList.add('ki-whatsapp', 'text-success');
@@ -345,7 +345,7 @@
                     badge.setAttribute('data-bs-original-title', tooltipMsg);
                     badge.setAttribute('title', tooltipMsg);
                 } else if (status === 'disconnected') {
-                    badge.classList.add('btn-light-danger', 'border-danger');
+                    badge.classList.add('bg-light-danger', 'border-danger');
                     dot.classList.add('bg-danger');
                     pulse.classList.add('bg-danger');
                     icon.classList.add('ki-disconnect', 'text-danger');
@@ -355,7 +355,7 @@
                     badge.setAttribute('data-bs-original-title', tooltipMsg);
                     badge.setAttribute('title', tooltipMsg);
                 } else {
-                    badge.classList.add('btn-light', 'border-secondary');
+                    badge.classList.add('bg-light', 'border-secondary');
                     dot.classList.add('bg-warning');
                     pulse.classList.add('bg-warning');
                     icon.classList.add('ki-whatsapp', 'text-muted');
