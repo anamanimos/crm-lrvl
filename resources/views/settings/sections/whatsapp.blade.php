@@ -11,8 +11,13 @@
         </a>
     </li>
     <li class="nav-item">
+        <a class="nav-link text-active-primary py-4 {{ $subsection == 'notif_telegram' ? 'active' : '' }}" href="{{ route('settings.section', ['section' => 'whatsapp', 'subsection' => 'notif_telegram']) }}">
+            <i class="ki-outline ki-send fs-4 me-2"></i> Notifikasi Telegram
+        </a>
+    </li>
+    <li class="nav-item">
         <a class="nav-link text-active-primary py-4 {{ $subsection == 'broadcast' ? 'active' : '' }}" href="{{ route('settings.section', ['section' => 'whatsapp', 'subsection' => 'broadcast']) }}">
-            <i class="ki-outline ki-send fs-4 me-2"></i> Broadcast
+            <i class="ki-outline ki-sms fs-4 me-2"></i> Broadcast
         </a>
     </li>
     <li class="nav-item">

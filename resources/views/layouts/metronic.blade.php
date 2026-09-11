@@ -131,7 +131,26 @@
                         </div>
 
                         <!--begin::Navbar-->
-                        <div class="app-navbar flex-shrink-0">
+                        <div class="app-navbar flex-shrink-0 align-items-center">
+                            <!--begin::WhatsApp Live Status-->
+                            <div class="app-navbar-item ms-1 ms-md-3">
+                                <a href="{{ route('settings.section', ['section' => 'whatsapp', 'subsection' => 'koneksi']) }}" 
+                                   id="header_wa_status_badge" 
+                                   class="btn btn-sm btn-custom btn-active-light d-flex align-items-center gap-2 py-1 px-3 border border-secondary border-opacity-25 rounded-pill" 
+                                   data-bs-toggle="tooltip" 
+                                   data-bs-placement="bottom" 
+                                   data-bs-html="true"
+                                   title="Status WhatsApp: <span class='text-warning'>Memeriksa...</span>">
+                                    <span class="d-inline-flex position-relative me-1" style="width: 8px; height: 8px;">
+                                        <span class="bullet bullet-dot bg-warning h-8px w-8px" id="header_wa_status_dot"></span>
+                                        <span class="bullet bullet-dot bg-warning h-8px w-8px position-absolute top-0 start-0 animation-blink" id="header_wa_status_pulse"></span>
+                                    </span>
+                                    <i class="ki-outline ki-whatsapp fs-3 text-muted" id="header_wa_status_icon"></i>
+                                    <span class="fs-7 fw-semibold text-muted d-none d-sm-inline" id="header_wa_status_text">Memeriksa...</span>
+                                </a>
+                            </div>
+                            <!--end::WhatsApp Live Status-->
+
                             <!--begin::Theme mode-->
                             <div class="app-navbar-item ms-1 ms-md-4">
                                 <a href="#" class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px" data-kt-menu-trigger="{default:'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
@@ -297,6 +316,86 @@
     <script src="{{ asset('assets/plugins/global/plugins.bundle.js') }}"></script>
     <script src="{{ asset('assets/js/scripts.bundle.js') }}"></script>
     
+    <!--begin::WhatsApp Status Poller-->
+    <script>
+        (function() {
+            const badge = document.getElementById('header_wa_status_badge');
+            const dot = document.getElementById('header_wa_status_dot');
+            const pulse = document.getElementById('header_wa_status_pulse');
+            const icon = document.getElementById('header_wa_status_icon');
+            const text = document.getElementById('header_wa_status_text');
+
+            if (!badge) return;
+
+            const updateHeaderWaBadge = (status, user = '') => {
+                badge.classList.remove('btn-light-success', 'btn-light-danger', 'btn-light-warning', 'btn-light', 'border-success', 'border-danger', 'border-secondary');
+                dot.classList.remove('bg-success', 'bg-danger', 'bg-warning');
+                pulse.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'd-none');
+                icon.classList.remove('text-success', 'text-danger', 'text-warning', 'text-muted', 'ki-whatsapp', 'ki-disconnect');
+                text.classList.remove('text-success', 'text-danger', 'text-warning', 'text-muted');
+
+                if (status === 'connected') {
+                    badge.classList.add('btn-light-success', 'border-success');
+                    dot.classList.add('bg-success');
+                    pulse.classList.add('bg-success');
+                    icon.classList.add('ki-whatsapp', 'text-success');
+                    text.classList.add('text-success');
+                    text.textContent = 'WA Terhubung';
+                    const tooltipMsg = `WhatsApp Terhubung ${user ? '(' + user + ')' : ''} - Klik untuk kelola`;
+                    badge.setAttribute('data-bs-original-title', tooltipMsg);
+                    badge.setAttribute('title', tooltipMsg);
+                } else if (status === 'disconnected') {
+                    badge.classList.add('btn-light-danger', 'border-danger');
+                    dot.classList.add('bg-danger');
+                    pulse.classList.add('bg-danger');
+                    icon.classList.add('ki-disconnect', 'text-danger');
+                    text.classList.add('text-danger');
+                    text.textContent = 'WA Terputus';
+                    const tooltipMsg = 'WhatsApp Terputus - Klik untuk tautkan perangkat';
+                    badge.setAttribute('data-bs-original-title', tooltipMsg);
+                    badge.setAttribute('title', tooltipMsg);
+                } else {
+                    badge.classList.add('btn-light', 'border-secondary');
+                    dot.classList.add('bg-warning');
+                    pulse.classList.add('bg-warning');
+                    icon.classList.add('ki-whatsapp', 'text-muted');
+                    text.classList.add('text-muted');
+                    text.textContent = 'Memeriksa...';
+                }
+            };
+
+            const checkStatus = () => {
+                fetch("{{ route('settings.whatsapp.status') }}")
+                    .then(r => r.json())
+                    .then(data => {
+                        let isConnected = false;
+                        let user = '';
+                        if (data && data.success && data.data) {
+                            const results = data.data.results || data.data.data?.results;
+                            if (results) {
+                                isConnected = results.is_connected && results.is_logged_in;
+                                user = results.device_id || '';
+                            } else if (data.data.status === 'connected' || data.data.status === 'ready') {
+                                isConnected = true;
+                                user = data.data.user || data.data.number || '';
+                            }
+                        }
+                        updateHeaderWaBadge(isConnected ? 'connected' : 'disconnected', user);
+                    })
+                    .catch(() => {
+                        updateHeaderWaBadge('disconnected');
+                    });
+            };
+
+            // Check immediately on page load
+            checkStatus();
+
+            // Periodic polling every 30 seconds
+            setInterval(checkStatus, 30000);
+        })();
+    </script>
+    <!--end::WhatsApp Status Poller-->
+
     @stack('js')
     @stack('scripts')
 </body>

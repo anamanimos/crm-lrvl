@@ -78,6 +78,21 @@ class BackupDatabaseToTelegram extends Command
             return 1;
         }
 
+        $this->info("Compressing backup...");
+        $zipPath = $path . '.zip';
+        $zip = new \ZipArchive();
+        if ($zip->open($zipPath, \ZipArchive::CREATE) === TRUE) {
+            $zip->addFile($path, basename($path));
+            $zip->close();
+            
+            unlink($path); // Delete original SQL file
+            
+            $path = $zipPath;
+            $filename = basename($zipPath);
+        } else {
+            $this->warn("Failed to compress backup, sending uncompressed version.");
+        }
+
         $this->info("Sending to Telegram...");
         
         try {

@@ -111,6 +111,17 @@ class WebhookController extends Controller
                 case 'read':
                     $this->handleStatusUpdate($input);
                     break;
+
+                case 'connection':
+                case 'connection.update':
+                case 'device.state':
+                case 'session.state':
+                case 'disconnected':
+                case 'logged_out':
+                case 'authenticated':
+                case 'ready':
+                    $this->handleConnectionUpdate($input, $type);
+                    break;
             }
             
             $log->update(['processed' => 1]);
@@ -361,6 +372,23 @@ class WebhookController extends Controller
                 }
             }
         }
+    }
+
+    protected function handleConnectionUpdate($data, $eventType)
+    {
+        $status = strtolower($data['status'] ?? $data['state'] ?? $eventType ?? '');
+        $isConnected = in_array($status, ['connected', 'open', 'authenticated', 'ready', 'online']);
+
+        if (in_array($status, ['disconnected', 'close', 'closed', 'logged_out', 'logout', 'unpaired'])) {
+            $isConnected = false;
+        }
+
+        $details = [
+            'session' => $data['device_id'] ?? Setting::get('gowa_device_id', 'crm-session'),
+            'reason' => $data['reason'] ?? $data['message'] ?? "Event Webhook: {$eventType} ({$status})"
+        ];
+
+        \App\Services\TelegramService::evaluateAndNotifyWaStatus($isConnected, $details);
     }
 
     protected function checkAutoReply($customer, $content)

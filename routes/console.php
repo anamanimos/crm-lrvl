@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::command('wa:sync-media')->hourly();
 Schedule::command('broadcast:process-scheduled')->everyMinute();
+Schedule::command('wa:check-status')->everyTwoMinutes();
 // Backup otomatis ke Telegram
 try {
     if (Schema::hasTable('settings')) {

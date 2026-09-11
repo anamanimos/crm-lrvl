@@ -157,6 +157,11 @@ class SettingController extends Controller
         if ($section == 'whatsapp' && !$request->has('auto_reply_enabled')) {
             $settings['auto_reply_enabled'] = '0';
         }
+        if ($section == 'whatsapp' && $request->input('subsection') == 'notif_telegram') {
+            if (!$request->has('telegram_wa_alert_enabled')) $settings['telegram_wa_alert_enabled'] = '0';
+            if (!$request->has('telegram_wa_notify_disconnect')) $settings['telegram_wa_notify_disconnect'] = '0';
+            if (!$request->has('telegram_wa_notify_connect')) $settings['telegram_wa_notify_connect'] = '0';
+        }
         if ($section == 'backup' && !$request->has('backup_enabled')) {
             $settings['backup_enabled'] = '0';
         }
@@ -557,7 +562,47 @@ class SettingController extends Controller
     {
         $deviceId = Setting::get('gowa_device_id', 'crm-session');
         $response = $this->waRequest('/devices/' . $deviceId . '/status');
+
+        $isConnected = false;
+        $details = ['session' => $deviceId];
+
+        if ($response['success'] && isset($response['data'])) {
+            $results = $response['data']['results'] ?? ($response['data']['data']['results'] ?? ($response['data']['data'] ?? []));
+            if (isset($results['is_connected']) && isset($results['is_logged_in'])) {
+                $isConnected = (bool) ($results['is_connected'] && $results['is_logged_in']);
+            } elseif (isset($response['data']['status']) && ($response['data']['status'] === 'connected' || $response['data']['status'] === 'ready')) {
+                $isConnected = true;
+            }
+
+            if (isset($results['device_id'])) {
+                $details['user'] = $results['device_id'];
+            }
+        }
+
+        // Evaluate and trigger Telegram notification if state changed
+        \App\Services\TelegramService::evaluateAndNotifyWaStatus($isConnected, $details);
+
         return response()->json($response);
+    }
+
+    public function testTelegramWa(Request $request)
+    {
+        $token = $request->input('token');
+        $chatId = $request->input('chat_id');
+
+        $configuredToken = $token ?: (\App\Models\Setting::get('telegram_wa_bot_token') ?: \App\Models\Setting::get('telegram_bot_token'));
+        $configuredChatId = $chatId ?: (\App\Models\Setting::get('telegram_wa_chat_id') ?: \App\Models\Setting::get('telegram_chat_id'));
+
+        if (empty($configuredToken)) {
+            return response()->json(['success' => false, 'message' => 'Telegram Bot Token harus diisi atau dikonfigurasi!']);
+        }
+
+        if (empty($configuredChatId)) {
+            return response()->json(['success' => false, 'message' => 'Telegram Chat ID harus diisi atau dikonfigurasi!']);
+        }
+
+        $res = \App\Services\TelegramService::testNotification($token, $chatId);
+        return response()->json($res);
     }
 
     public function waPairing()

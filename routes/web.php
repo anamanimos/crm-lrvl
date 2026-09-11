@@ -171,6 +171,7 @@ Route::middleware(['auth'])->group(function () {
     Route::name('settings.')->group(function() {
         Route::get('/settings/test/erp', [SettingController::class, 'testErp'])->name('test.erp');
         Route::get('/settings/whatsapp/status', [SettingController::class, 'waStatus'])->name('whatsapp.status');
+        Route::post('/settings/whatsapp/test-telegram', [SettingController::class, 'testTelegramWa'])->name('whatsapp.test.telegram');
         Route::get('/settings/whatsapp/pairing', [SettingController::class, 'waPairing'])->name('whatsapp.pairing');
         Route::get('/settings/whatsapp/logout', [SettingController::class, 'waLogout'])->name('whatsapp.logout');
         Route::post('/settings/whatsapp/webhook/delete/{id}', [SettingController::class, 'waWebhookDelete'])->name('whatsapp.webhook.delete');
