@@ -81,8 +81,9 @@ class WebhookController extends Controller
         // --- DEVICE ID FILTERING ---
         $incomingDevice = $input['device_id'] ?? null;
         $pairedJid = Setting::get('gowa_paired_jid');
+        $strictDeviceFilter = Setting::get('gowa_strict_device_filter', '0');
 
-        if ($incomingDevice && !empty($pairedJid)) {
+        if ($incomingDevice && !empty($pairedJid) && $strictDeviceFilter === '1') {
             // Clean both for comparison
             $cleanIncoming = preg_replace('/[^0-9]/', '', $incomingDevice);
             $cleanPaired = preg_replace('/[^0-9]/', '', $pairedJid);
@@ -166,45 +167,11 @@ class WebhookController extends Controller
         $isGroup = (strpos($chatJid, '@g.us') !== false || strpos($chatJid, '-') !== false);
         $waGroupId = null;
         $customerId = null;
+        $customer = null;
 
         // Clean JIDs
         $chatJid = explode(':', $chatJid)[0];
         $from = explode(':', $from)[0];
-
-        // Always identify the sender as a customer
-        $senderPhone = preg_replace('/[^0-9]/', '', explode('@', $from)[0]);
-        $senderName = $data['pushname'] ?? $data['name'] ?? $data['sender_name'] ?? $data['from_name'] ?? null;
-
-        if ($senderPhone) {
-            $customer = Customer::where('wa_number', $senderPhone)->first();
-            if (!$customer) {
-                // Detect source from incoming message content only for new customers
-                $detectedSource = null;
-                if (!$fromMe && !empty($content)) {
-                    $matchedRule = \App\Models\ChatSourceRule::findMatch($content);
-                    if ($matchedRule) {
-                        $detectedSource = $matchedRule->source_name;
-                    }
-                }
-
-                $formattedName = $senderName ?: ('WA - ' . $senderPhone);
-                if ($senderName && !str_contains($formattedName, $senderPhone)) {
-                    $formattedName = $senderName . ' - ' . $senderPhone;
-                }
-                $customer = Customer::create([
-                    'wa_number' => $senderPhone,
-                    'name' => $formattedName,
-                    'source' => $detectedSource ?: 'Unknown'
-                ]);
-            } elseif ($senderName && (empty($customer->name) || str_starts_with($customer->name, 'WA - '))) {
-                $customer->update(['name' => $senderName . ' - ' . $senderPhone]);
-            }
-            $customerId = $customer->id;
-            // Only update last_chat_at for personal chats (not in group context)
-            if (!$isGroup) {
-                $customer->update(['last_chat_at' => now()]);
-            }
-        }
 
         if ($isGroup) {
             $waGroup = WaGroup::where('jid', $chatJid)->first();
@@ -227,10 +194,69 @@ class WebhookController extends Controller
             $waGroupId = $waGroup->id;
             $waGroup->update(['last_chat_at' => now()]);
             
+            $senderName = $data['pushname'] ?? $data['name'] ?? $data['sender_name'] ?? $data['from_name'] ?? null;
             // Add Sender Prefix for Group Messages (Parity with Legacy)
             if (!$fromMe && $senderName && !empty($content) && strpos($content, '[SENDER:') === false) {
                 $content = "[SENDER:{$senderName}] " . $content;
             }
+        } else {
+            // 1-on-1 Chat
+            if ($fromMe) {
+                // Outgoing message sent from device/WA Web: customer is the recipient (chatJid / to), not the sender ($from)
+                $targetPhone = preg_replace('/[^0-9]/', '', explode('@', $chatJid)[0]);
+                if (empty($targetPhone) && !empty($data['to'])) {
+                    $targetPhone = preg_replace('/[^0-9]/', '', explode('@', $data['to'])[0]);
+                }
+
+                if ($targetPhone) {
+                    $customer = Customer::where('wa_number', $targetPhone)->first();
+                    if (!$customer) {
+                        $customer = Customer::create([
+                            'wa_number' => $targetPhone,
+                            'name' => 'WA - ' . $targetPhone,
+                            'source' => 'WhatsApp Outgoing'
+                        ]);
+                    }
+                    $customerId = $customer->id;
+                    $customer->update(['last_chat_at' => now()]);
+                }
+            } else {
+                // Incoming message from customer: customer is the sender ($from)
+                $senderPhone = preg_replace('/[^0-9]/', '', explode('@', $from)[0]);
+                $senderName = $data['pushname'] ?? $data['name'] ?? $data['sender_name'] ?? $data['from_name'] ?? null;
+
+                if ($senderPhone) {
+                    $customer = Customer::where('wa_number', $senderPhone)->first();
+                    if (!$customer) {
+                        // Detect source from incoming message content only for new customers
+                        $detectedSource = null;
+                        if (!empty($content)) {
+                            $matchedRule = \App\Models\ChatSourceRule::findMatch($content);
+                            if ($matchedRule) {
+                                $detectedSource = $matchedRule->source_name;
+                            }
+                        }
+
+                        $formattedName = $senderName ?: ('WA - ' . $senderPhone);
+                        if ($senderName && !str_contains($formattedName, $senderPhone)) {
+                            $formattedName = $senderName . ' - ' . $senderPhone;
+                        }
+                        $customer = Customer::create([
+                            'wa_number' => $senderPhone,
+                            'name' => $formattedName,
+                            'source' => $detectedSource ?: 'Unknown'
+                        ]);
+                    } elseif ($senderName && (empty($customer->name) || str_starts_with($customer->name, 'WA - '))) {
+                        $customer->update(['name' => $senderName . ' - ' . $senderPhone]);
+                    }
+                    $customerId = $customer->id;
+                    $customer->update(['last_chat_at' => now()]);
+                }
+            }
+        }
+
+        if (!$customerId && !$waGroupId) {
+            return;
         }
 
         // --- OUTGOING SYNC / SIMILARITY MATCH ---
@@ -277,6 +303,20 @@ class WebhookController extends Controller
             $mediaUrl = $this->getMediaUrl($data['document']);
             $filename = is_array($data['document']) ? ($data['document']['filename'] ?? 'document') : ($data['filename'] ?? 'document');
             $content = "[DOCUMENT:{$mediaUrl}:{$filename}]";
+        } elseif (isset($data['video'])) {
+            $messageType = 'video';
+            $mediaUrl = $this->getMediaUrl($data['video']);
+            $caption = is_array($data['video']) ? ($data['video']['caption'] ?? '') : ($data['caption'] ?? '');
+            $content = "[VIDEO:{$mediaUrl}]" . ($caption ? " {$caption}" : "");
+        } elseif (isset($data['audio']) || isset($data['voice'])) {
+            $messageType = 'audio';
+            $audioData = $data['audio'] ?? $data['voice'];
+            $mediaUrl = $this->getMediaUrl($audioData);
+            $content = "[AUDIO:{$mediaUrl}]";
+        } elseif (isset($data['sticker'])) {
+            $messageType = 'sticker';
+            $mediaUrl = $this->getMediaUrl($data['sticker']);
+            $content = "[STICKER:{$mediaUrl}]";
         }
 
         // 7. Extract Reply/Quoted Message
@@ -293,6 +333,12 @@ class WebhookController extends Controller
             }
         }
 
+        $waTimestamp = null;
+        if (isset($data['timestamp'])) {
+            $ts = is_numeric($data['timestamp']) ? (int)$data['timestamp'] : strtotime($data['timestamp']);
+            if ($ts > 0) $waTimestamp = $ts;
+        }
+
         // 8. Save Message
         Message::create([
             'customer_id' => $customerId,
@@ -302,15 +348,18 @@ class WebhookController extends Controller
             'type' => $messageType,
             'media_url' => $mediaUrl,
             'wa_message_id' => $messageId,
+            'wa_timestamp' => $waTimestamp ?: time(),
             'reply_message_id' => $replyMessageId,
             'reply_content' => $replyContent,
             'reply_sender_name' => $replySenderName,
             'status' => $fromMe ? 'sent' : 'unread',
+            'is_external_reply' => (bool)$fromMe,
+            'user_id' => null,
             'created_at' => now(),
         ]);
 
         // 8. Auto Reply (only for individual incoming messages)
-        if (!$isGroup && !$fromMe && Setting::get('auto_reply_enabled') == '1') {
+        if (!$isGroup && !$fromMe && $customer && Setting::get('auto_reply_enabled') == '1') {
             $this->checkAutoReply($customer, $content);
         }
     }
@@ -381,6 +430,10 @@ class WebhookController extends Controller
 
         if (in_array($status, ['disconnected', 'close', 'closed', 'logged_out', 'logout', 'unpaired'])) {
             $isConnected = false;
+        }
+
+        if (!empty($data['device_id']) && $isConnected) {
+            Setting::set('gowa_paired_jid', $data['device_id']);
         }
 
         $details = [

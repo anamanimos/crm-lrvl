@@ -576,6 +576,7 @@ class SettingController extends Controller
 
             if (isset($results['device_id'])) {
                 $details['user'] = $results['device_id'];
+                Setting::set('gowa_paired_jid', $results['device_id']);
             }
         }
 
