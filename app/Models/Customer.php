@@ -45,7 +45,7 @@ class Customer extends Model
 
     public function messages()
     {
-        return $this->hasMany(Message::class);
+        return $this->hasMany(Message::class)->whereNull('wa_group_id');
     }
 
     public function assignedUser()

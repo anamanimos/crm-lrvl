@@ -210,12 +210,14 @@ class ChatController extends Controller
                 
                 // Mark as read
                 Message::where('customer_id', $chat_id)
+                    ->whereNull('wa_group_id')
                     ->where('direction', 'in')
                     ->whereIn('status', ['unread', 'delivered'])
                     ->update(['status' => 'read']);
             }
             $messages = Message::with(['replyMessage', 'customer', 'revisions'])
                 ->where('customer_id', $chat_id)
+                ->whereNull('wa_group_id')
                 ->orderBy('created_at', 'desc')
                 ->limit($limit)
                 ->get()
@@ -599,7 +601,7 @@ class ChatController extends Controller
         if ($type === 'group') {
             Message::where('wa_group_id', $id)->where('direction', 'in')->update(['status' => 'read']);
         } else {
-            Message::where('customer_id', $id)->where('direction', 'in')->update(['status' => 'read']);
+            Message::where('customer_id', $id)->whereNull('wa_group_id')->where('direction', 'in')->update(['status' => 'read']);
         }
 
         return response()->json(['success' => true]);
@@ -615,7 +617,7 @@ class ChatController extends Controller
             $last_msg = Message::where('wa_group_id', $id)->where('direction', 'in')->orderBy('created_at', 'desc')->first();
             if ($last_msg) $last_msg->update(['status' => 'unread']);
         } else {
-            $last_msg = Message::where('customer_id', $id)->where('direction', 'in')->orderBy('created_at', 'desc')->first();
+            $last_msg = Message::where('customer_id', $id)->whereNull('wa_group_id')->where('direction', 'in')->orderBy('created_at', 'desc')->first();
             if ($last_msg) $last_msg->update(['status' => 'unread']);
         }
 
@@ -728,7 +730,7 @@ class ChatController extends Controller
         if ($type === 'group') {
             $query->where('wa_group_id', $chat_id);
         } else {
-            $query->where('customer_id', $chat_id);
+            $query->where('customer_id', $chat_id)->whereNull('wa_group_id');
         }
 
         if ($after_date) {
