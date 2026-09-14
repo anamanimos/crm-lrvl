@@ -153,7 +153,7 @@
 
                             <!--begin::Theme mode-->
                             <div class="app-navbar-item ms-1 ms-md-4">
-                                <a href="#" class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px" data-kt-menu-trigger="{default:'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                                <a href="#" class="btn btn-icon btn-custom btn-icon-muted btn-active-light btn-active-color-primary w-35px h-35px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                                     <i class="ki-outline ki-night-day theme-light-show fs-1"></i>
                                     <i class="ki-outline ki-moon theme-dark-show fs-1"></i>
                                 </a>
@@ -182,7 +182,7 @@
 
                             <!--begin::User menu-->
                             <div class="app-navbar-item ms-1 ms-md-4" id="kt_header_user_menu_toggle">
-                                <div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="{default: 'click', lg: 'hover'}" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
+                                <div class="cursor-pointer symbol symbol-35px" data-kt-menu-trigger="click" data-kt-menu-attach="parent" data-kt-menu-placement="bottom-end">
                                     <div class="symbol-label fs-5 fw-semibold bg-primary text-inverse-primary">{{ generate_initials(auth()->user()->name) }}</div>
                                 </div>
                                 <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded menu-gray-800 menu-state-bg menu-state-color fw-semibold py-4 fs-6 w-275px" data-kt-menu="true">

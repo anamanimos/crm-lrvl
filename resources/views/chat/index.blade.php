@@ -3,8 +3,8 @@
     <link href="{{ asset('assets/chat/chat.css') }}" rel="stylesheet" type="text/css" />
     <style>
         .app-footer { display: none !important; }
-        #kt_app_content_container { height: calc(100vh - 80px) !important; }
-        .app-container {
+        #kt_app_content_container { 
+            height: calc(100vh - 80px) !important; 
             padding-left: 0 !important;
             padding-right: 0 !important;
         }
