@@ -101,6 +101,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/labels/update/{id}', [LabelController::class, 'update'])->name('labels.update');
         Route::post('/labels/delete/{id}', [LabelController::class, 'destroy'])->name('labels.delete');
         Route::post('/labels/toggle-status/{id}', [LabelController::class, 'toggle_status'])->name('labels.toggle-status');
+        Route::post('/labels/reset', [LabelController::class, 'reset'])->name('labels.reset');
 
         // Templates
         Route::get('/templates', [\App\Http\Controllers\TemplateController::class, 'index'])->name('templates.index');
@@ -238,4 +239,9 @@ Route::prefix('api')->middleware('api.key')->group(function () {
     Route::get('/sources', [CustomerController::class, 'apiSources']);
     Route::get('/chat-sources', [CustomerController::class, 'apiSources']);
     Route::get('/reports/new-chatters', [ReportController::class, 'apiNewChatters']);
+
+    // Chat / WhatsApp Messaging API
+    Route::post('/messages/send', [\App\Http\Controllers\Api\ChatApiController::class, 'sendMessage']);
+    Route::post('/send-message', [\App\Http\Controllers\Api\ChatApiController::class, 'sendMessage']);
+    Route::get('/whatsapp/status', [\App\Http\Controllers\Api\ChatApiController::class, 'getStatus']);
 });

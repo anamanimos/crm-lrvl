@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\AutoReply;
 use App\Models\WaGroup;
 use App\Models\WebhookLog;
+use App\Models\Label;
 use App\Services\WaGateway;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
@@ -122,6 +123,16 @@ class WebhookController extends Controller
                 case 'authenticated':
                 case 'ready':
                     $this->handleConnectionUpdate($input, $type);
+                    break;
+
+                case 'label.edit':
+                case 'label_edit':
+                    $this->handleLabelEdit($input);
+                    break;
+
+                case 'label.association':
+                case 'label_association':
+                    $this->handleLabelAssociation($input);
                     break;
             }
             
@@ -569,6 +580,103 @@ class WebhookController extends Controller
                 ->post($url, json_decode($payload, true));
         } catch (\Exception $e) {
             // Silent fail for forwarder
+        }
+    }
+
+    protected function handleLabelEdit($data)
+    {
+        $labelId = $data['label_id'] ?? ($data['payload']['label_id'] ?? null);
+        if (!$labelId) {
+            return;
+        }
+
+        $name = $data['name'] ?? ($data['payload']['name'] ?? null);
+        $deleted = $data['deleted'] ?? ($data['payload']['deleted'] ?? false);
+        $color = $data['color'] ?? ($data['payload']['color'] ?? null);
+        $orderIndex = $data['order_index'] ?? ($data['payload']['order_index'] ?? 0);
+        $predefinedId = $data['predefined_id'] ?? ($data['payload']['predefined_id'] ?? null);
+        $isActive = $data['is_active'] ?? ($data['payload']['is_active'] ?? true);
+
+        if ($deleted) {
+            $label = Label::where('wa_label_id', (string) $labelId)->first();
+            if ($label) {
+                // Detach from all customers and delete
+                $label->customers()->detach();
+                $label->delete();
+                Log::info("WhatsApp Label deleted via webhook: ID={$labelId} ({$label->name})");
+            }
+            return;
+        }
+
+        if (empty($name)) {
+            $existing = Label::where('wa_label_id', (string) $labelId)->first();
+            $name = $existing ? $existing->name : ("Label #" . $labelId);
+        }
+
+        $hexColor = Label::colorFromIndex($color);
+
+        $label = Label::updateOrCreate(
+            ['wa_label_id' => (string) $labelId],
+            [
+                'name' => $name,
+                'color' => $hexColor,
+                'is_active' => (bool) $isActive,
+                'order_index' => (int) $orderIndex,
+                'predefined_id' => $predefinedId ? (string) $predefinedId : null,
+            ]
+        );
+
+        Log::info("WhatsApp Label saved/updated via webhook: ID={$label->id}, WA_ID={$labelId}, Name={$name}, Color={$hexColor}");
+    }
+
+    protected function handleLabelAssociation($data)
+    {
+        $labelId = $data['label_id'] ?? ($data['payload']['label_id'] ?? null);
+        $chatId = $data['chat_id'] ?? ($data['payload']['chat_id'] ?? null);
+        $labeled = $data['labeled'] ?? ($data['payload']['labeled'] ?? null);
+
+        if (!$labelId || !$chatId) {
+            return;
+        }
+
+        // 1. Find or create the Label
+        $label = Label::where('wa_label_id', (string) $labelId)->first();
+        if (!$label) {
+            $label = Label::create([
+                'wa_label_id' => (string) $labelId,
+                'name' => 'Label #' . $labelId,
+                'color' => '#00a884',
+                'is_active' => true,
+            ]);
+        }
+
+        // 2. Resolve Customer from chat_id
+        if (str_contains($chatId, '@g.us')) {
+            Log::info("Label association received for group: {$chatId}, label={$labelId}");
+            return;
+        }
+
+        $cleanPhone = preg_replace('/[^0-9]/', '', explode('@', $chatId)[0]);
+        if (empty($cleanPhone)) {
+            return;
+        }
+
+        $customer = Customer::where('wa_number', $cleanPhone)->first();
+        if (!$customer) {
+            $customer = Customer::create([
+                'wa_number' => $cleanPhone,
+                'name' => 'WA - ' . $cleanPhone,
+                'source' => 'WhatsApp',
+            ]);
+        }
+
+        // 3. Attach or Detach
+        if ($labeled === true || $labeled === 1 || $labeled === 'true') {
+            $customer->labels()->syncWithoutDetaching([$label->id]);
+            Log::info("Attached label {$label->name} (WA: {$labelId}) to customer {$cleanPhone}");
+        } elseif ($labeled === false || $labeled === 0 || $labeled === 'false') {
+            $customer->labels()->detach($label->id);
+            Log::info("Detached label {$label->name} (WA: {$labelId}) from customer {$cleanPhone}");
         }
     }
 }

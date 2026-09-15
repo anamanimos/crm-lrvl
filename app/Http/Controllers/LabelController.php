@@ -10,7 +10,7 @@ class LabelController extends Controller
 {
     public function index()
     {
-        $labels = Label::withCount('customers')->orderBy('name', 'asc')->get();
+        $labels = Label::withCount('customers')->orderBy('order_index', 'asc')->orderBy('name', 'asc')->get();
         return view('labels.index', compact('labels'));
     }
 
@@ -65,5 +65,15 @@ class LabelController extends Controller
         $label->save();
 
         return response()->json(['success' => true]);
+    }
+
+    public function reset(Request $request)
+    {
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        \Illuminate\Support\Facades\DB::table('customer_labels')->truncate();
+        Label::truncate();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        return redirect()->route('admin.labels.index')->with('success', 'Semua data label berhasil dikosongkan. Label baru akan otomatis terpetakan saat ada aktivitas label di WhatsApp.');
     }
 }

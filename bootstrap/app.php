@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         $middleware->validateCsrfTokens(except: [
             'webhook/wa',
+            'api/*',
         ]);
         $middleware->alias([
             'api.key' => \App\Http\Middleware\VerifyApiKey::class,

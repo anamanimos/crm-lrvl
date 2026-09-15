@@ -21,8 +21,12 @@
                 </ul>
             </div>
             <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <button type="button" class="btn btn-sm fw-bold btn-light-danger btn-reset-labels">
+                    <i class="ki-outline ki-arrows-circle fs-4 me-1"></i>
+                    Kosongkan Label
+                </button>
                 <a href="{{ route('admin.labels.create') }}" class="btn btn-sm fw-bold btn-primary">
-                    <i class="ki-outline ki-plus fs-4"></i>
+                    <i class="ki-outline ki-plus fs-4 me-1"></i>
                     Tambah Label
                 </a>
             </div>
@@ -33,6 +37,24 @@
     <!--begin::Content-->
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
+
+            <!--begin::WhatsApp Sync Notice-->
+            <div class="notice d-flex bg-light-primary rounded border-primary border border-dashed p-5 mb-5">
+                <i class="ki-outline ki-information-5 fs-2tx text-primary me-4"></i>
+                <div class="d-flex flex-stack flex-grow-1">
+                    <div class="fw-semibold">
+                        <h5 class="text-gray-900 fw-bold mb-1">Sinkronisasi Label WhatsApp Business</h5>
+                        <div class="fs-7 text-gray-700">
+                            Label customer terhubung langsung dengan label WhatsApp. Setiap kali label dibuat, diubah, dihapus, atau dipasangkan ke kontak di WhatsApp Business, CRM akan otomatis memetakannya secara <em>real-time</em> via webhook.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--end::WhatsApp Sync Notice-->
+
+            <form id="form_reset_labels" action="{{ route('admin.labels.reset') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
             
             @if (session('success'))
             <div class="alert alert-success d-flex align-items-center p-5 mb-5">
@@ -61,9 +83,16 @@
                             @forelse ($labels as $label)
                             <tr>
                                 <td>
-                                    <span class="badge fs-6" style="background-color: {{ $label->color }}20; color: {{ $label->color }}">
-                                        {{ $label->name }}
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge fs-6" style="background-color: {{ $label->color }}20; color: {{ $label->color }}">
+                                            {{ $label->name }}
+                                        </span>
+                                        @if ($label->wa_label_id)
+                                        <span class="badge badge-light-success fs-8" title="Label terhubung dengan WhatsApp">
+                                            <i class="ki-outline ki-whatsapp fs-8 text-success me-1"></i>WA ID: {{ $label->wa_label_id }}
+                                        </span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center gap-2">
@@ -92,8 +121,14 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="text-center py-10 text-muted">
-                                    Belum ada data label
+                                <td colspan="5" class="text-center py-12">
+                                    <div class="d-flex flex-column align-items-center">
+                                        <i class="ki-outline ki-tag fs-3x text-muted mb-3"></i>
+                                        <div class="fs-5 fw-bold text-gray-800 mb-1">Belum Ada Label</div>
+                                        <div class="text-muted fs-7 max-w-400px text-center">
+                                            Label WhatsApp akan otomatis dipetakan di sini saat Anda membuat, mengedit, atau menandai chat di aplikasi WhatsApp Business.
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                             @endforelse
@@ -110,6 +145,26 @@
 @push('js')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        var btnReset = document.querySelector('.btn-reset-labels');
+        if (btnReset) {
+            btnReset.addEventListener('click', function(e) {
+                e.preventDefault();
+                Swal.fire({
+                    title: 'Kosongkan Semua Label?',
+                    text: 'Seluruh label dan penandaan pelanggan saat ini akan dihapus. Label baru akan otomatis terpetakan ketika ada aktivitas label di WhatsApp.',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Kosongkan!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById('form_reset_labels').submit();
+                    }
+                });
+            });
+        }
+
         document.querySelectorAll('.btn-delete-label').forEach(function(btn) {
             btn.addEventListener('click', function(e) {
                 e.preventDefault();

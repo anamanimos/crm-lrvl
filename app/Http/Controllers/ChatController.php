@@ -773,8 +773,35 @@ class ChatController extends Controller
             return response()->json(['success' => false, 'message' => 'Customer tidak ditemukan'], 404);
         }
 
+        $oldLabelIds = $customer->labels()->pluck('labels.id')->toArray();
         $customer->labels()->sync($labels);
         $new_labels = $customer->labels;
+
+        // Two-way sync to WhatsApp for labels with wa_label_id
+        if (!empty($customer->wa_number)) {
+            $currentLabelObjects = \App\Models\Label::whereIn('id', $labels)->whereNotNull('wa_label_id')->get();
+            $oldLabelObjects = \App\Models\Label::whereIn('id', $oldLabelIds)->whereNotNull('wa_label_id')->get();
+
+            // Newly attached WA labels
+            $added = $currentLabelObjects->whereNotIn('id', $oldLabelIds);
+            foreach ($added as $lbl) {
+                try {
+                    $this->waGateway->setChatLabel($customer->wa_number, $lbl->wa_label_id, true);
+                } catch (\Exception $e) {
+                    Log::warning("Failed to sync label {$lbl->wa_label_id} attach to WhatsApp: " . $e->getMessage());
+                }
+            }
+
+            // Removed WA labels
+            $removed = $oldLabelObjects->whereNotIn('id', $labels);
+            foreach ($removed as $lbl) {
+                try {
+                    $this->waGateway->setChatLabel($customer->wa_number, $lbl->wa_label_id, false);
+                } catch (\Exception $e) {
+                    Log::warning("Failed to sync label {$lbl->wa_label_id} detach to WhatsApp: " . $e->getMessage());
+                }
+            }
+        }
 
         return response()->json([
             'success' => true,

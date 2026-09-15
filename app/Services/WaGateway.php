@@ -161,6 +161,14 @@ class WaGateway
         ]);
     }
 
+    public function setChatLabel($phone, $waLabelId, $labeled = true)
+    {
+        return $this->post('/chat/' . $this->prepareJid($phone) . '/label', [
+            'label_id' => (string) $waLabelId,
+            'labeled' => (bool) $labeled,
+        ]);
+    }
+
     protected function get($endpoint, $params = [])
     {
         $response = $this->getClient()->get($this->gatewayUrl . $endpoint, $params);
