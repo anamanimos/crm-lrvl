@@ -66,6 +66,12 @@
                                     </span>
                                     @endif
                                 </div>
+                                <div class="mt-3 pt-2 border-top border-gray-100">
+                                    <button type="button" onclick="openLeadsModal('{{ date('Y-m-d') }}', 'Hari Ini')" class="btn btn-link btn-color-primary btn-active-color-primary p-0 text-start fs-8 fw-bold d-inline-flex align-items-center gap-1">
+                                        <span>Cek Detail Leads Hari Ini</span>
+                                        <i class="ki-outline ki-arrow-right fs-8"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -154,7 +160,9 @@
                                     <i class="ki-outline ki-chart-simple-3 fs-3 text-primary"></i>
                                     <h3 class="fw-bold text-gray-900 fs-5 mb-0">Tren Leads Masuk Harian</h3>
                                 </div>
-                                <span class="text-muted fs-7 mt-1">Perolehan kontak baru per hari dalam 14 hari terakhir</span>
+                                <span class="text-muted fs-7 mt-1">
+                                    Perolehan kontak baru per hari (14 hari terakhir) &bull; <span class="text-primary fw-semibold"><i class="ki-outline ki-mouse fs-8 text-primary"></i> Klik batang untuk rincian detail</span>
+                                </span>
                             </div>
                             <div class="card-toolbar">
                                 <span class="badge badge-light-primary fw-bold fs-7 px-3 py-2">
@@ -373,8 +381,198 @@
         </div>
     </div>
 
+    <!--begin::Modal - Leads Detail-->
+    <div class="modal fade" id="modal_leads_detail" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header pb-3 border-bottom">
+                    <div class="d-flex flex-column">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="ki-outline ki-user-tick fs-3 text-primary"></i>
+                            <h4 class="fw-bold text-gray-900 mb-0" id="modal_leads_title">Detail Leads Masuk</h4>
+                            <span class="badge badge-light-primary fw-bold fs-8" id="modal_leads_badge">0 Lead</span>
+                        </div>
+                        <span class="text-muted fs-7 mt-1" id="modal_leads_subtitle">Pilih tanggal untuk melihat rincian kontak masuk</span>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <input type="date" class="form-control form-control-sm form-control-solid w-140px" id="modal_leads_datepicker" onchange="fetchLeadsByDate(this.value)">
+                        <button type="button" class="btn btn-sm btn-icon btn-light" data-bs-dismiss="modal">
+                            <i class="ki-outline ki-cross fs-2"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="modal-body py-4">
+                    <!-- Loading State -->
+                    <div id="modal_leads_loading" class="py-12 text-center">
+                        <div class="spinner-border text-primary w-35px h-35px mb-3" role="status"></div>
+                        <div class="text-gray-600 fw-semibold fs-7">Mengambil rincian data leads...</div>
+                    </div>
+
+                    <!-- Empty State -->
+                    <div id="modal_leads_empty" class="py-12 text-center d-none">
+                        <div class="symbol symbol-60px symbol-circle bg-light mb-3">
+                            <i class="ki-outline ki-user-square fs-2tx text-muted"></i>
+                        </div>
+                        <div class="fw-bold text-gray-800 fs-6 mb-1">Tidak Ada Leads Baru</div>
+                        <div class="text-muted fs-7 max-w-350px mx-auto">
+                            Belum ada kontak atau pelanggan baru yang terdaftar pada tanggal ini.
+                        </div>
+                    </div>
+
+                    <!-- Table Container -->
+                    <div id="modal_leads_table_wrap" class="table-responsive d-none">
+                        <table class="table table-row-dashed align-middle gs-0 gy-3 my-0">
+                            <thead>
+                                <tr class="fs-7 fw-bold text-gray-500 border-bottom-1 border-gray-200">
+                                    <th class="min-w-160px">PELANGGAN</th>
+                                    <th class="min-w-130px">NOMOR WHATSAPP</th>
+                                    <th class="min-w-100px">JAM MASUK</th>
+                                    <th class="min-w-130px">LABEL WHATSAPP</th>
+                                    <th class="min-w-120px">CS / SUMBER</th>
+                                    <th class="text-end min-w-70px">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal_leads_tbody">
+                                <!-- Rendered via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="modal-footer justify-content-between py-3 border-top">
+                    <a href="{{ route('admin.customers.index') }}" id="btn_modal_open_customer_page" class="btn btn-sm btn-light-primary">
+                        <i class="ki-outline ki-arrow-up-right fs-5 me-1"></i>
+                        Buka di Halaman Customer
+                    </a>
+                    <button type="button" class="btn btn-sm btn-light" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--end::Modal - Leads Detail-->
+
     @push('js')
     <script>
+        var leadsModalInstance = null;
+
+        function openLeadsModal(dateStr, labelText) {
+            var modalEl = document.getElementById('modal_leads_detail');
+            if (!modalEl) return;
+
+            if (!leadsModalInstance) {
+                leadsModalInstance = new bootstrap.Modal(modalEl);
+            }
+            leadsModalInstance.show();
+
+            document.getElementById('modal_leads_datepicker').value = dateStr;
+            fetchLeadsByDate(dateStr, labelText);
+        }
+
+        function fetchLeadsByDate(dateStr, labelText) {
+            var loadingEl = document.getElementById('modal_leads_loading');
+            var emptyEl = document.getElementById('modal_leads_empty');
+            var tableWrapEl = document.getElementById('modal_leads_table_wrap');
+            var tbodyEl = document.getElementById('modal_leads_tbody');
+            var titleEl = document.getElementById('modal_leads_title');
+            var subtitleEl = document.getElementById('modal_leads_subtitle');
+            var badgeEl = document.getElementById('modal_leads_badge');
+            var customerLinkEl = document.getElementById('btn_modal_open_customer_page');
+
+            loadingEl.classList.remove('d-none');
+            emptyEl.classList.add('d-none');
+            tableWrapEl.classList.add('d-none');
+            tbodyEl.innerHTML = '';
+
+            fetch('{{ route('dashboard.leads-detail') }}?date=' + encodeURIComponent(dateStr))
+                .then(function(res) {
+                    return res.json();
+                })
+                .then(function(data) {
+                    loadingEl.classList.add('d-none');
+                    if (!data || !data.success) {
+                        emptyEl.classList.remove('d-none');
+                        return;
+                    }
+
+                    titleEl.textContent = 'Detail Leads: ' + data.formatted_date;
+                    subtitleEl.textContent = 'Hari ' + data.day_name + ' (' + data.total + ' kontak baru)';
+                    badgeEl.textContent = data.total + ' Lead';
+                    if (customerLinkEl) {
+                        customerLinkEl.href = data.customer_list_url;
+                    }
+
+                    if (data.total === 0) {
+                        emptyEl.classList.remove('d-none');
+                    } else {
+                        tableWrapEl.classList.remove('d-none');
+                        var html = '';
+                        data.leads.forEach(function(lead) {
+                            var labelsHtml = '';
+                            if (lead.labels && lead.labels.length > 0) {
+                                labelsHtml = '<div class="d-flex flex-wrap gap-1">';
+                                lead.labels.forEach(function(lbl) {
+                                    labelsHtml += '<span class="badge fs-8 py-1 px-2" style="background-color: ' + lbl.color + '18; color: ' + lbl.color + ';">' + escapeHtml(lbl.name) + '</span>';
+                                });
+                                labelsHtml += '</div>';
+                            } else {
+                                labelsHtml = '<span class="text-muted fs-8">Tidak ada label</span>';
+                            }
+
+                            var csInfo = escapeHtml(lead.assigned_user);
+                            if (lead.source) {
+                                csInfo += ' <span class="badge badge-light fs-9 text-muted ms-1">' + escapeHtml(lead.source) + '</span>';
+                            }
+
+                            html += '<tr>' +
+                                '<td>' +
+                                    '<div class="d-flex align-items-center">' +
+                                        '<div class="symbol symbol-35px symbol-circle me-3">' +
+                                            '<div class="symbol-label fs-6 fw-bold bg-light-primary text-primary">' + escapeHtml(lead.initials) + '</div>' +
+                                        '</div>' +
+                                        '<div class="d-flex flex-column">' +
+                                            '<span class="text-gray-800 fw-bold fs-6">' + escapeHtml(lead.name) + '</span>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</td>' +
+                                '<td>' +
+                                    '<span class="text-gray-700 fw-semibold fs-7 font-monospace">' + escapeHtml(lead.formatted_phone) + '</span>' +
+                                '</td>' +
+                                '<td>' +
+                                    '<span class="badge badge-light-secondary text-gray-700 fs-8 fw-semibold">' + escapeHtml(lead.created_at_time) + '</span>' +
+                                '</td>' +
+                                '<td>' + labelsHtml + '</td>' +
+                                '<td>' +
+                                    '<span class="text-gray-700 fs-7">' + csInfo + '</span>' +
+                                '</td>' +
+                                '<td class="text-end">' +
+                                    '<a href="' + lead.chat_url + '" class="btn btn-sm btn-icon btn-light-success btn-active-success" title="Buka Chat">' +
+                                        '<i class="ki-outline ki-message-text-2 fs-4"></i>' +
+                                    '</a>' +
+                                '</td>' +
+                            '</tr>';
+                        });
+                        tbodyEl.innerHTML = html;
+                    }
+                })
+                .catch(function(err) {
+                    loadingEl.classList.add('d-none');
+                    emptyEl.classList.remove('d-none');
+                });
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            var map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return String(text).replace(/[&<>"']/g, function(m) { return map[m]; });
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             var chartElement = document.getElementById('chart_daily_leads');
             if (!chartElement || typeof ApexCharts === 'undefined') {
@@ -382,6 +580,7 @@
             }
 
             var categories = @json($dailyDates);
+            var fullDates = @json($dailyFullDates);
             var leadsData = @json($dailyLeads);
 
             var options = {
@@ -395,6 +594,14 @@
                     height: 310,
                     toolbar: {
                         show: false
+                    },
+                    events: {
+                        dataPointSelection: function(event, chartContext, config) {
+                            var idx = config.dataPointIndex;
+                            if (idx >= 0 && fullDates[idx]) {
+                                openLeadsModal(fullDates[idx], categories[idx]);
+                            }
+                        }
                     }
                 },
                 plotOptions: {
@@ -470,7 +677,7 @@
                     },
                     y: {
                         formatter: function(val) {
-                            return val + ' Lead Baru';
+                            return val + ' Lead Baru (Klik untuk detail)';
                         }
                     }
                 },

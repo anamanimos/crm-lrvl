@@ -30,6 +30,7 @@ Route::get('/auth/claim-admin', [App\Http\Controllers\Auth\OidcController::class
 Route::post('/auth/claim-admin', [App\Http\Controllers\Auth\OidcController::class, 'claimAdmin'])->name('auth.claim-admin.post')->middleware('auth');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth'])->name('dashboard');
+Route::get('/dashboard/leads-detail', [DashboardController::class, 'leadsDetail'])->middleware(['auth'])->name('dashboard.leads-detail');
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

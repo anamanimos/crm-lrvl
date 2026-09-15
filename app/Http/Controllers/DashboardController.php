@@ -45,6 +45,7 @@ class DashboardController extends Controller
             ->toArray();
 
         $dailyDates = [];
+        $dailyFullDates = [];
         $dailyLeads = [];
         $dailyMsgIn = [];
         $dailyMsgOut = [];
@@ -55,6 +56,7 @@ class DashboardController extends Controller
             $labelKey = $day->format('d M');
 
             $dailyDates[] = $labelKey;
+            $dailyFullDates[] = $dateKey;
             $dailyLeads[] = (int) ($leadsByDate[$dateKey] ?? 0);
             $dailyMsgIn[] = (int) ($msgInByDate[$dateKey] ?? 0);
             $dailyMsgOut[] = (int) ($msgOutByDate[$dateKey] ?? 0);
@@ -94,6 +96,7 @@ class DashboardController extends Controller
             ],
             'daily' => [
                 'dates' => $dailyDates,
+                'full_dates' => $dailyFullDates,
                 'leads' => $dailyLeads,
                 'messages_in' => $dailyMsgIn,
                 'messages_out' => $dailyMsgOut,
@@ -112,6 +115,7 @@ class DashboardController extends Controller
             'uniqueChattersToday',
             'totalCustomers',
             'dailyDates',
+            'dailyFullDates',
             'dailyLeads',
             'dailyMsgIn',
             'dailyMsgOut',
@@ -119,5 +123,59 @@ class DashboardController extends Controller
             'recentCustomers',
             'waSession'
         ));
+    }
+
+    /**
+     * Get detailed list of new leads created on a specific date.
+     */
+    public function leadsDetail(Request $request)
+    {
+        $dateStr = $request->input('date', date('Y-m-d'));
+        try {
+            $date = Carbon::parse($dateStr);
+        } catch (\Exception $e) {
+            $date = Carbon::today();
+            $dateStr = $date->format('Y-m-d');
+        }
+
+        $start = $date->copy()->startOfDay();
+        $end = $date->copy()->endOfDay();
+
+        $leads = Customer::with(['labels', 'assignedUser', 'company'])
+            ->whereBetween('created_at', [$start, $end])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $data = $leads->map(function ($lead) {
+            return [
+                'id' => $lead->id,
+                'name' => $lead->name ?: 'Tanpa Nama',
+                'initials' => generate_initials($lead->name ?: $lead->wa_number),
+                'wa_number' => $lead->wa_number,
+                'formatted_phone' => format_phone_display($lead->wa_number),
+                'created_at_time' => $lead->created_at ? $lead->created_at->format('H:i') . ' WIB' : '-',
+                'source' => $lead->source ?: 'WhatsApp',
+                'assigned_user' => $lead->assignedUser ? $lead->assignedUser->name : '-',
+                'company' => $lead->company ? $lead->company->name : null,
+                'labels' => $lead->labels->map(function ($lbl) {
+                    return [
+                        'name' => $lbl->name,
+                        'color' => $lbl->color,
+                        'wa_label_id' => $lbl->wa_label_id,
+                    ];
+                }),
+                'chat_url' => url('chat?customer=' . $lead->id),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'date' => $dateStr,
+            'formatted_date' => $date->translatedFormat('d F Y'),
+            'day_name' => $date->translatedFormat('l'),
+            'total' => $leads->count(),
+            'leads' => $data,
+            'customer_list_url' => route('admin.customers.index', ['created_date' => $dateStr]),
+        ]);
     }
 }

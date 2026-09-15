@@ -41,6 +41,10 @@ class CustomerController extends Controller
             $query->where('source', $request->source);
         }
 
+        if ($request->filled('created_date')) {
+            $query->whereDate('customers.created_at', $request->created_date);
+        }
+
         if ($request->has('archive') && $request->archive !== '' && $request->archive !== 'all') {
             $query->where('is_archived', (int) $request->archive);
         } elseif ($request->input('archive') === 'all') {
