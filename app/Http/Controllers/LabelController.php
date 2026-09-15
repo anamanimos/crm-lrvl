@@ -16,25 +16,18 @@ class LabelController extends Controller
 
     public function create()
     {
-        return view('labels.form');
+        return redirect()->route('admin.labels.index')->with('info', 'Label dikelola dan disinkronisasikan otomatis dari WhatsApp Business.');
     }
 
     public function edit($id)
     {
         $label = Label::findOrFail($id);
-        return view('labels.form', compact('label'));
+        return redirect()->route('admin.labels.index')->with('info', 'Label dikelola dan disinkronisasikan otomatis dari WhatsApp Business.');
     }
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'color' => 'nullable|string|max:20',
-        ]);
-
-        Label::create($request->all());
-
-        return redirect()->route('admin.labels.index')->with('success', 'Label berhasil ditambahkan');
+        return redirect()->route('admin.labels.index')->with('info', 'Label dikelola dan disinkronisasikan otomatis dari WhatsApp Business.');
     }
 
     public function update(Request $request, $id)

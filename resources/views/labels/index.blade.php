@@ -25,10 +25,6 @@
                     <i class="ki-outline ki-arrows-circle fs-4 me-1"></i>
                     Kosongkan Label
                 </button>
-                <a href="{{ route('admin.labels.create') }}" class="btn btn-sm fw-bold btn-primary">
-                    <i class="ki-outline ki-plus fs-4 me-1"></i>
-                    Tambah Label
-                </a>
             </div>
         </div>
     </div>
@@ -71,6 +67,16 @@
                 <i class="ki-outline ki-cross-circle fs-2hx text-danger me-4"></i>
                 <div class="d-flex flex-column">
                     <span>{{ session('error') }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
+            @if (session('info'))
+            <div class="alert alert-info d-flex align-items-center p-5 mb-5">
+                <i class="ki-outline ki-information-5 fs-2hx text-info me-4"></i>
+                <div class="d-flex flex-column">
+                    <span>{{ session('info') }}</span>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
@@ -119,13 +125,10 @@
                                     </span>
                                 </td>
                                 <td class="text-end">
-                                    <a href="{{ route('admin.labels.edit', $label->id) }}" 
-                                       class="btn btn-icon btn-light-primary btn-sm me-1">
-                                        <i class="ki-outline ki-pencil fs-5"></i>
-                                    </a>
                                     <button type="button" class="btn btn-icon btn-light-danger btn-sm btn-delete-label" 
                                             onclick="confirmDeleteLabel('{{ $label->id }}', '{{ addslashes($label->name) }}')"
-                                            data-id="{{ $label->id }}" data-name="{{ $label->name }}">
+                                            data-id="{{ $label->id }}" data-name="{{ $label->name }}"
+                                            title="Hapus Label">
                                         <i class="ki-outline ki-trash fs-5"></i>
                                     </button>
                                 </td>
