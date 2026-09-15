@@ -127,7 +127,7 @@ class CustomerController extends Controller
         $labels = Label::withCount('customers')->get();
 
         $sources = ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
+            ->concat(['TikTok', 'Instagram', 'Website', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
 
@@ -157,7 +157,7 @@ class CustomerController extends Controller
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
         $sources = \App\Models\ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
+            ->concat(['TikTok', 'Instagram', 'Website', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
         $customer = null;
@@ -228,7 +228,7 @@ class CustomerController extends Controller
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
         $sources = \App\Models\ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
+            ->concat(['TikTok', 'Instagram', 'Website', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
 
@@ -739,7 +739,7 @@ class CustomerController extends Controller
 
         // Get defined sources from ChatSourceRule and default list
         $ruleSources = ChatSourceRule::pluck('source_name')->toArray();
-        $defaultSources = ['Tiktok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'];
+        $defaultSources = ['Tiktok', 'Instagram', 'Website', 'Referral', 'Direct Chat – Belum Ditanya'];
 
         $sourceMap = [];
         foreach (array_merge(array_keys($customerCounts), $ruleSources, $defaultSources) as $s) {
