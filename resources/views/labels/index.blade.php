@@ -66,6 +66,16 @@
             </div>
             @endif
 
+            @if (session('error'))
+            <div class="alert alert-danger d-flex align-items-center p-5 mb-5">
+                <i class="ki-outline ki-cross-circle fs-2hx text-danger me-4"></i>
+                <div class="d-flex flex-column">
+                    <span>{{ session('error') }}</span>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            @endif
+
             <!--begin::Card-->
             <div class="card">
                 <div class="card-body py-4">

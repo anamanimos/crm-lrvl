@@ -102,7 +102,7 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/labels/update/{id}', [LabelController::class, 'update'])->name('labels.update');
         Route::post('/labels/delete/{id}', [LabelController::class, 'destroy'])->name('labels.delete');
         Route::post('/labels/toggle-status/{id}', [LabelController::class, 'toggle_status'])->name('labels.toggle-status');
-        Route::post('/labels/reset', [LabelController::class, 'reset'])->name('labels.reset');
+        Route::match(['get', 'post'], '/labels/reset', [LabelController::class, 'reset'])->name('labels.reset');
 
         // Templates
         Route::get('/templates', [\App\Http\Controllers\TemplateController::class, 'index'])->name('templates.index');

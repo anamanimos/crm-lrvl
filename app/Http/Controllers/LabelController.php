@@ -69,11 +69,16 @@ class LabelController extends Controller
 
     public function reset(Request $request)
     {
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        \Illuminate\Support\Facades\DB::table('customer_labels')->truncate();
-        Label::truncate();
-        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        try {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            \Illuminate\Support\Facades\DB::table('customer_labels')->delete();
+            Label::query()->delete();
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        return redirect()->route('admin.labels.index')->with('success', 'Semua data label berhasil dikosongkan. Label baru akan otomatis terpetakan saat ada aktivitas label di WhatsApp.');
+            return redirect()->route('admin.labels.index')->with('success', 'Semua data label berhasil dikosongkan. Label baru akan otomatis terpetakan saat ada aktivitas label di WhatsApp.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Gagal mereset label: ' . $e->getMessage());
+            return redirect()->route('admin.labels.index')->with('error', 'Gagal mengosongkan label: ' . $e->getMessage());
+        }
     }
 }
