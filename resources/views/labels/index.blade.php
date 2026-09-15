@@ -21,7 +21,7 @@
                 </ul>
             </div>
             <div class="d-flex align-items-center gap-2 gap-lg-3">
-                <button type="button" class="btn btn-sm fw-bold btn-light-danger btn-reset-labels">
+                <button type="button" class="btn btn-sm fw-bold btn-light-danger btn-reset-labels" onclick="confirmResetLabels()">
                     <i class="ki-outline ki-arrows-circle fs-4 me-1"></i>
                     Kosongkan Label
                 </button>
@@ -124,6 +124,7 @@
                                         <i class="ki-outline ki-pencil fs-5"></i>
                                     </a>
                                     <button type="button" class="btn btn-icon btn-light-danger btn-sm btn-delete-label" 
+                                            onclick="confirmDeleteLabel('{{ $label->id }}', '{{ addslashes($label->name) }}')"
                                             data-id="{{ $label->id }}" data-name="{{ $label->name }}">
                                         <i class="ki-outline ki-trash fs-5"></i>
                                     </button>
@@ -150,15 +151,11 @@
 
         </div>
     </div>
-</x-metronic-layout>
 
-@push('js')
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        var btnReset = document.querySelector('.btn-reset-labels');
-        if (btnReset) {
-            btnReset.addEventListener('click', function(e) {
-                e.preventDefault();
+    @push('js')
+    <script>
+        function confirmResetLabels() {
+            if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'Kosongkan Semua Label?',
                     text: 'Seluruh label dan penandaan pelanggan saat ini akan dihapus. Label baru akan otomatis terpetakan ketika ada aktivitas label di WhatsApp.',
@@ -169,18 +166,24 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        document.getElementById('form_reset_labels').submit();
+                        var form = document.getElementById('form_reset_labels');
+                        if (form) {
+                            form.submit();
+                        }
                     }
                 });
-            });
+            } else {
+                if (confirm('Kosongkan Semua Label? Seluruh label dan penandaan pelanggan saat ini akan dihapus.')) {
+                    var form = document.getElementById('form_reset_labels');
+                    if (form) {
+                        form.submit();
+                    }
+                }
+            }
         }
 
-        document.querySelectorAll('.btn-delete-label').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                var id = this.dataset.id;
-                var name = this.dataset.name;
-                
+        function confirmDeleteLabel(id, name) {
+            if (typeof Swal !== 'undefined') {
                 Swal.fire({
                     title: 'Hapus Label?',
                     text: 'Label "' + name + '" akan dihapus permanen.',
@@ -191,24 +194,65 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        fetch("{{ url('admin/labels/delete') }}/" + id, { 
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                location.reload();
-                            } else {
-                                Swal.fire('Error!', data.message, 'error');
-                            }
-                        });
+                        executeDeleteLabel(id);
                     }
                 });
+            } else {
+                if (confirm('Hapus label "' + name + '" secara permanen?')) {
+                    executeDeleteLabel(id);
+                }
+            }
+        }
+
+        function executeDeleteLabel(id) {
+            var tokenMeta = document.querySelector('meta[name="csrf-token"]');
+            var token = tokenMeta ? tokenMeta.getAttribute('content') : '';
+
+            fetch("{{ url('admin/labels/delete') }}/" + id, { 
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire('Error!', data.message || 'Gagal menghapus label', 'error');
+                    } else {
+                        alert(data.message || 'Gagal menghapus label');
+                    }
+                }
+            })
+            .catch(err => {
+                alert('Terjadi kesalahan saat menghapus label.');
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var btnReset = document.querySelector('.btn-reset-labels');
+            if (btnReset && !btnReset.getAttribute('onclick')) {
+                btnReset.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    confirmResetLabels();
+                });
+            }
+
+            document.querySelectorAll('.btn-delete-label').forEach(function(btn) {
+                if (!btn.getAttribute('onclick')) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        var id = this.dataset.id;
+                        var name = this.dataset.name;
+                        confirmDeleteLabel(id, name);
+                    });
+                }
             });
         });
-    });
-</script>
-@endpush
+    </script>
+    @endpush
+</x-metronic-layout>
