@@ -141,41 +141,61 @@ class DashboardController extends Controller
         $start = $date->copy()->startOfDay();
         $end = $date->copy()->endOfDay();
 
-        $leads = Customer::with(['labels', 'assignedUser', 'company'])
-            ->whereBetween('created_at', [$start, $end])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        try {
+            $leads = Customer::with(['labels', 'assignedUser', 'company'])
+                ->where(function ($q) use ($start, $end, $dateStr) {
+                    $q->whereBetween('created_at', [$start, $end])
+                      ->orWhereDate('created_at', $dateStr);
+                })
+                ->orderBy('created_at', 'desc')
+                ->get();
 
-        $data = $leads->map(function ($lead) {
-            return [
-                'id' => $lead->id,
-                'name' => $lead->name ?: 'Tanpa Nama',
-                'initials' => generate_initials($lead->name ?: $lead->wa_number),
-                'wa_number' => $lead->wa_number,
-                'formatted_phone' => format_phone_display($lead->wa_number),
-                'created_at_time' => $lead->created_at ? $lead->created_at->format('H:i') . ' WIB' : '-',
-                'source' => $lead->source ?: 'WhatsApp',
-                'assigned_user' => $lead->assignedUser ? $lead->assignedUser->name : '-',
-                'company' => $lead->company ? $lead->company->name : null,
-                'labels' => $lead->labels->map(function ($lbl) {
-                    return [
-                        'name' => $lbl->name,
-                        'color' => $lbl->color,
-                        'wa_label_id' => $lbl->wa_label_id,
-                    ];
-                }),
-                'chat_url' => url('chat?customer=' . $lead->id),
-            ];
-        });
+            $data = $leads->map(function ($lead) {
+                $name = (string) ($lead->name ?: 'Tanpa Nama');
+                $phone = (string) ($lead->wa_number ?: '');
 
-        return response()->json([
-            'success' => true,
-            'date' => $dateStr,
-            'formatted_date' => $date->translatedFormat('d F Y'),
-            'day_name' => $date->translatedFormat('l'),
-            'total' => $leads->count(),
-            'leads' => $data,
-            'customer_list_url' => route('admin.customers.index', ['created_date' => $dateStr]),
-        ]);
+                return [
+                    'id' => $lead->id,
+                    'name' => $name,
+                    'initials' => generate_initials($name),
+                    'wa_number' => $phone,
+                    'formatted_phone' => format_phone_display($phone),
+                    'created_at_time' => $lead->created_at ? $lead->created_at->format('H:i') . ' WIB' : '-',
+                    'source' => $lead->source ?: 'WhatsApp',
+                    'assigned_user' => $lead->assignedUser ? $lead->assignedUser->name : '-',
+                    'company' => $lead->company ? $lead->company->name : null,
+                    'labels' => $lead->labels ? $lead->labels->map(function ($lbl) {
+                        return [
+                            'name' => $lbl->name ?? '',
+                            'color' => $lbl->color ?: '#00A884',
+                            'wa_label_id' => $lbl->wa_label_id ?? null,
+                        ];
+                    }) : [],
+                    'chat_url' => url('chat?customer=' . $lead->id),
+                ];
+            });
+
+            return response()->json([
+                'success' => true,
+                'date' => $dateStr,
+                'formatted_date' => $date->translatedFormat('d F Y'),
+                'day_name' => $date->translatedFormat('l'),
+                'total' => $leads->count(),
+                'leads' => $data,
+                'customer_list_url' => route('admin.customers.index', ['created_date' => $dateStr]),
+            ], 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Error in leadsDetail: ' . $e->getMessage() . "\n" . $e->getTraceAsString());
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage(),
+                'date' => $dateStr,
+                'formatted_date' => $date->translatedFormat('d F Y'),
+                'day_name' => $date->translatedFormat('l'),
+                'total' => 0,
+                'leads' => [],
+                'customer_list_url' => route('admin.customers.index', ['created_date' => $dateStr]),
+            ], 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
+        }
     }
 }

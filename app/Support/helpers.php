@@ -5,9 +5,17 @@ if (!function_exists('format_phone')) {
      * Format phone number to WhatsApp format (with country code)
      */
     function format_phone($phone) {
+        if (empty($phone)) {
+            return '';
+        }
+
         // Remove all non-numeric characters
-        $phone = preg_replace('/[^0-9]/', '', $phone);
+        $phone = preg_replace('/[^0-9]/', '', (string)$phone);
         
+        if (empty($phone)) {
+            return '';
+        }
+
         // If starts with 0, replace with 62
         if (substr($phone, 0, 1) === '0') {
             $phone = '62' . substr($phone, 1);
@@ -27,7 +35,14 @@ if (!function_exists('format_phone_display')) {
      * Format phone number for display (readable format)
      */
     function format_phone_display($phone) {
+        if (empty($phone)) {
+            return '-';
+        }
+
         $phone = format_phone($phone);
+        if (empty($phone)) {
+            return '-';
+        }
         
         // Format: +62 812-3456-7890
         if (strlen($phone) >= 10) {
@@ -43,23 +58,33 @@ if (!function_exists('format_phone_display')) {
 
 if (!function_exists('generate_initials')) {
     /**
-     * Generate initials from name
+     * Generate initials from name (multibyte & emoji safe)
      */
     function generate_initials($name) {
         if (empty($name)) {
             return '?';
         }
         
-        $words = explode(' ', trim($name));
+        // Strip emojis and non-alphanumeric characters, keeping standard letters & numbers
+        $clean = preg_replace('/[^\p{L}\p{N}\s]/u', '', (string)$name);
+        $clean = trim((string)$clean);
+
+        // If cleaning resulted in empty (e.g. name was pure emojis or symbols), fallback
+        if (empty($clean)) {
+            $fallback = trim((string)$name);
+            return mb_strtoupper(mb_substr($fallback, 0, 2, 'UTF-8'), 'UTF-8');
+        }
+
+        $words = preg_split('/\s+/u', $clean);
         $initials = '';
-        
+
         foreach ($words as $word) {
             if (!empty($word)) {
-                $initials .= strtoupper(substr($word, 0, 1));
+                $initials .= mb_strtoupper(mb_substr($word, 0, 1, 'UTF-8'), 'UTF-8');
             }
         }
-        
-        return substr($initials, 0, 2);
+
+        return mb_substr($initials, 0, 2, 'UTF-8');
     }
 }
 

@@ -164,7 +164,11 @@
                                     Perolehan kontak baru per hari (14 hari terakhir) &bull; <span class="text-primary fw-semibold"><i class="ki-outline ki-mouse fs-8 text-primary"></i> Klik batang untuk rincian detail</span>
                                 </span>
                             </div>
-                            <div class="card-toolbar">
+                            <div class="card-toolbar d-flex align-items-center gap-2">
+                                <button type="button" class="btn btn-sm btn-light-primary py-2 px-3 fw-bold fs-7" onclick="openLeadsModal('{{ end($dailyFullDates) }}', 'Hari Ini')">
+                                    <i class="ki-outline ki-calendar-search fs-5 me-1"></i>
+                                    Rincian Hari Ini
+                                </button>
                                 <span class="badge badge-light-primary fw-bold fs-7 px-3 py-2">
                                     Total 14 Hari: {{ $totalLeads14Days }} Lead
                                 </span>
@@ -479,6 +483,16 @@
             var badgeEl = document.getElementById('modal_leads_badge');
             var customerLinkEl = document.getElementById('btn_modal_open_customer_page');
 
+            var displayDate = labelText ? labelText : dateStr;
+            titleEl.textContent = 'Detail Leads: ' + displayDate;
+            subtitleEl.textContent = 'Memuat data kontak...';
+            badgeEl.textContent = 'Memuat...';
+            badgeEl.className = 'badge badge-light-primary fw-bold fs-8';
+
+            if (customerLinkEl) {
+                customerLinkEl.href = '{{ route('admin.customers.index') }}?created_date=' + encodeURIComponent(dateStr);
+            }
+
             loadingEl.classList.remove('d-none');
             emptyEl.classList.add('d-none');
             tableWrapEl.classList.add('d-none');
@@ -486,19 +500,27 @@
 
             fetch('{{ route('dashboard.leads-detail') }}?date=' + encodeURIComponent(dateStr))
                 .then(function(res) {
+                    if (!res.ok) {
+                        throw new Error('HTTP ' + res.status);
+                    }
                     return res.json();
                 })
                 .then(function(data) {
                     loadingEl.classList.add('d-none');
                     if (!data || !data.success) {
+                        badgeEl.textContent = '0 Lead';
+                        badgeEl.className = 'badge badge-light fw-bold fs-8 text-muted';
+                        subtitleEl.textContent = 'Gagal memuat rincian kontak';
                         emptyEl.classList.remove('d-none');
                         return;
                     }
 
-                    titleEl.textContent = 'Detail Leads: ' + data.formatted_date;
-                    subtitleEl.textContent = 'Hari ' + data.day_name + ' (' + data.total + ' kontak baru)';
+                    titleEl.textContent = 'Detail Leads: ' + (data.formatted_date || displayDate);
+                    subtitleEl.textContent = 'Hari ' + (data.day_name || '') + ' (' + data.total + ' kontak baru)';
                     badgeEl.textContent = data.total + ' Lead';
-                    if (customerLinkEl) {
+                    badgeEl.className = data.total > 0 ? 'badge badge-light-success fw-bold fs-8 text-success' : 'badge badge-light fw-bold fs-8 text-muted';
+
+                    if (customerLinkEl && data.customer_list_url) {
                         customerLinkEl.href = data.customer_list_url;
                     }
 
@@ -557,7 +579,11 @@
                 })
                 .catch(function(err) {
                     loadingEl.classList.add('d-none');
+                    tableWrapEl.classList.add('d-none');
                     emptyEl.classList.remove('d-none');
+                    badgeEl.textContent = '0 Lead';
+                    badgeEl.className = 'badge badge-light fw-bold fs-8 text-muted';
+                    subtitleEl.textContent = 'Terjadi kesalahan saat memuat data kontak';
                 });
         }
 
