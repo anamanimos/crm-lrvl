@@ -5,7 +5,7 @@
 
     <!--begin::Toolbar-->
     <div id="kt_app_toolbar" class="app-toolbar py-3 py-lg-6">
-        <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack">
+        <div id="kt_app_toolbar_container" class="app-container container-fluid d-flex flex-stack flex-wrap gap-3">
             <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                 <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
                     Dashboard
@@ -17,8 +17,15 @@
                     <li class="breadcrumb-item">
                         <span class="bullet bg-gray-500 w-5px h-2px"></span>
                     </li>
-                    <li class="breadcrumb-item text-muted">Dashboard</li>
+                    <li class="breadcrumb-item text-muted">Ringkasan Leads & Aktivitas WhatsApp</li>
                 </ul>
+            </div>
+            
+            <div class="d-flex align-items-center gap-2 gap-lg-3">
+                <a href="{{ route('chat.index') }}" class="btn btn-sm btn-primary d-flex align-items-center gap-2">
+                    <i class="ki-outline ki-whatsapp fs-4"></i>
+                    <span>Buka Chat WhatsApp</span>
+                </a>
             </div>
         </div>
     </div>
@@ -28,102 +35,107 @@
     <div id="kt_app_content" class="app-content flex-column-fluid">
         <div id="kt_app_content_container" class="app-container container-fluid">
             
-            <!--begin::Row - Statistics-->
-            <div class="row g-5 g-xl-10 mb-5 mb-xl-10">
-                <!--begin::Col-->
-                <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-md-5 mb-xl-10">
-                    <div class="card card-flush bgi-no-repeat bgi-size-contain bgi-position-x-end h-md-50 mb-5 mb-xl-10" 
-                         style="background-color: #F1416C;">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-white me-2 lh-1 ls-n2">
-                                    {{ $stats['total_customers'] }}
-                                </span>
-                                <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Total Customer</span>
+            <!--begin::Row - KPI Statistics Cards-->
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                <!--begin::Col - Leads Hari Ini-->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border border-gray-200 hover-elevate-up shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-between p-6">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <span class="text-gray-500 fw-semibold fs-7">LEADS HARI INI</span>
+                                <div class="symbol symbol-40px symbol-circle bg-light-primary">
+                                    <i class="ki-outline ki-user-tick fs-2 text-primary"></i>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card card-flush h-md-50 mb-5 mb-xl-10" style="background-color: #7239EA;">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-white me-2 lh-1 ls-n2">
-                                    {{ $stats['messages_today']['total_in'] }}
+                            <div class="d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-gray-900 mb-1 lh-1">
+                                    {{ $leadsToday }}
                                 </span>
-                                <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Pesan Masuk Hari Ini</span>
+                                <div class="d-flex align-items-center gap-2 pt-2">
+                                    @if ($leadsDiff > 0)
+                                    <span class="badge badge-light-success fs-8 fw-bold">
+                                        <i class="ki-outline ki-arrow-up fs-8 text-success me-1"></i>+{{ $leadsDiff }} vs kemarin
+                                    </span>
+                                    @elseif ($leadsDiff < 0)
+                                    <span class="badge badge-light-danger fs-8 fw-bold">
+                                        <i class="ki-outline ki-arrow-down fs-8 text-danger me-1"></i>{{ $leadsDiff }} vs kemarin
+                                    </span>
+                                    @else
+                                    <span class="badge badge-light fs-8 fw-semibold text-muted">
+                                        Sama dengan kemarin ({{ $leadsYesterday }})
+                                    </span>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!--end::Col-->
 
-                <!--begin::Col-->
-                <div class="col-md-6 col-lg-6 col-xl-6 col-xxl-3 mb-md-5 mb-xl-10">
-                    <div class="card card-flush h-md-50 mb-5 mb-xl-10" style="background-color: #50CD89;">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-white me-2 lh-1 ls-n2">
-                                    {{ $stats['messages_today']['total_out'] }}
-                                </span>
-                                <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Pesan Keluar Hari Ini</span>
+                <!--begin::Col - Pesan Masuk Hari Ini-->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border border-gray-200 hover-elevate-up shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-between p-6">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <span class="text-gray-500 fw-semibold fs-7">PESAN MASUK HARI INI</span>
+                                <div class="symbol symbol-40px symbol-circle bg-light-success">
+                                    <i class="ki-outline ki-entrance-left fs-2 text-success"></i>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <div class="card card-flush h-md-50 mb-5 mb-xl-10" style="background-color: #009EF7;">
-                        <div class="card-header pt-5">
-                            <div class="card-title d-flex flex-column">
-                                <span class="fs-2hx fw-bold text-white me-2 lh-1 ls-n2">
-                                    {{ $stats['total_deals'] }}
+                            <div class="d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-gray-900 mb-1 lh-1">
+                                    {{ $chatInToday }}
                                 </span>
-                                <span class="text-white opacity-75 pt-1 fw-semibold fs-6">Total Deals</span>
+                                <span class="text-muted fs-7 pt-2">
+                                    Dari <strong class="text-gray-700">{{ $uniqueChattersToday }}</strong> kontak aktif
+                                </span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <!--end::Col-->
 
-                <!--begin::Col - Funnel Pipeline-->
-                <div class="col-xxl-6">
-                    <div class="card card-flush h-xl-100">
-                        <div class="card-header pt-7">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-900">Deals Pipeline</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-6">Deals per tahapan</span>
-                            </h3>
+                <!--begin::Col - Pesan Keluar Hari Ini-->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border border-gray-200 hover-elevate-up shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-between p-6">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <span class="text-gray-500 fw-semibold fs-7">PESAN KELUAR HARI INI</span>
+                                <div class="symbol symbol-40px symbol-circle bg-light-info">
+                                    <i class="ki-outline ki-exit-right fs-2 text-info"></i>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-gray-900 mb-1 lh-1">
+                                    {{ $chatOutToday }}
+                                </span>
+                                <span class="text-muted fs-7 pt-2">
+                                    Balasan CS dan pesan keluar
+                                </span>
+                            </div>
                         </div>
-                        <div class="card-body pt-5">
-                            @if($stats['deal_stats']->isNotEmpty())
-                                @foreach ($stats['deal_stats'] as $deal)
-                                <div class="d-flex flex-stack mb-5">
-                                    <div class="d-flex align-items-center me-2">
-                                        <div class="symbol symbol-35px me-3">
-                                            <div class="symbol-label" style="background-color: {{ $deal->color }}20;">
-                                                <i class="ki-outline ki-abstract-26 fs-4" style="color: {{ $deal->color }}"></i>
-                                            </div>
-                                        </div>
-                                        <div>
-                                            <a href="{{ url('deals?stage=' . $deal->id) }}" 
-                                               class="fs-5 text-gray-800 text-hover-primary fw-bold">
-                                                {{ $deal->name }}
-                                            </a>
-                                            <div class="fs-8 text-muted mt-n1">
-                                                Rp {{ number_format($deal->deals_sum_expected_value ?? 0, 0, ',', '.') }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="badge badge-light-primary fs-base fw-bold">
-                                            {{ $deal->deals_count ?? 0 }}
-                                        </span>
-                                    </div>
+                    </div>
+                </div>
+                <!--end::Col-->
+
+                <!--begin::Col - Total Database Kontak-->
+                <div class="col-12 col-sm-6 col-xl-3">
+                    <div class="card card-flush h-100 border border-gray-200 hover-elevate-up shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-between p-6">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <span class="text-gray-500 fw-semibold fs-7">TOTAL KONTAK CRM</span>
+                                <div class="symbol symbol-40px symbol-circle bg-light-warning">
+                                    <i class="ki-outline ki-address-book fs-2 text-warning"></i>
                                 </div>
-                                @endforeach
-                            @else
-                                <div class="text-center text-muted py-10">
-                                    Belum ada data deals
-                                </div>
-                            @endif
+                            </div>
+                            <div class="d-flex flex-column">
+                                <span class="fs-2hx fw-bold text-gray-900 mb-1 lh-1">
+                                    {{ number_format($totalCustomers, 0, ',', '.') }}
+                                </span>
+                                <span class="text-muted fs-7 pt-2">
+                                    Database pelanggan tersimpan
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -131,63 +143,209 @@
             </div>
             <!--end::Row-->
 
-            <!--begin::Row - Recent Customers-->
-            <div class="row g-5 g-xl-10">
-                <div class="col-xl-12">
-                    <div class="card card-flush">
-                        <div class="card-header pt-7">
-                            <h3 class="card-title align-items-start flex-column">
-                                <span class="card-label fw-bold text-gray-900">Customer Terbaru</span>
-                                <span class="text-gray-500 mt-1 fw-semibold fs-6">10 customer dengan aktivitas terakhir</span>
-                            </h3>
+            <!--begin::Row - Chart & Quick Actions-->
+            <div class="row g-5 g-xl-8 mb-5 mb-xl-8">
+                <!--begin::Col - Daily Leads Chart-->
+                <div class="col-12 col-xl-8">
+                    <div class="card card-flush h-xl-100 border border-gray-200 shadow-sm">
+                        <div class="card-header pt-6 pb-2">
+                            <div class="card-title d-flex flex-column">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ki-outline ki-chart-simple-3 fs-3 text-primary"></i>
+                                    <h3 class="fw-bold text-gray-900 fs-5 mb-0">Tren Leads Masuk Harian</h3>
+                                </div>
+                                <span class="text-muted fs-7 mt-1">Perolehan kontak baru per hari dalam 14 hari terakhir</span>
+                            </div>
                             <div class="card-toolbar">
-                                <a href="{{ route('admin.customers.index') }}" class="btn btn-sm btn-light-primary">
-                                    Lihat Semua
+                                <span class="badge badge-light-primary fw-bold fs-7 px-3 py-2">
+                                    Total 14 Hari: {{ $totalLeads14Days }} Lead
+                                </span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-5">
+                            <div id="chart_daily_leads" style="min-height: 310px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <!--end::Col-->
+
+                <!--begin::Col - Gateway & Quick Shortcuts-->
+                <div class="col-12 col-xl-4">
+                    <div class="card card-flush h-xl-100 border border-gray-200 shadow-sm">
+                        <div class="card-header pt-6 pb-2">
+                            <div class="card-title d-flex flex-column">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ki-outline ki-element-11 fs-3 text-gray-700"></i>
+                                    <h3 class="fw-bold text-gray-900 fs-5 mb-0">Operasional & Akses Cepat</h3>
+                                </div>
+                                <span class="text-muted fs-7 mt-1">Pintasan fitur utama CRM</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-3">
+                            <!--begin::WhatsApp Status Box-->
+                            <div class="p-4 rounded-3 bg-light-primary border border-primary border-opacity-20 mb-6">
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="symbol symbol-40px symbol-circle bg-white">
+                                            <i class="ki-outline ki-whatsapp fs-2 text-success"></i>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="text-gray-900 fw-bold fs-6">{{ $waSession }}</span>
+                                            <span class="text-muted fs-8">WhatsApp Gateway Utama</span>
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('settings.section', ['section' => 'whatsapp', 'subsection' => 'koneksi']) }}" 
+                                       class="btn btn-sm btn-white btn-active-light-primary border border-gray-300 py-1 px-3 fs-8">
+                                        Kelola Sesi
+                                    </a>
+                                </div>
+                            </div>
+                            <!--end::WhatsApp Status Box-->
+
+                            <!--begin::Quick Links List-->
+                            <div class="d-flex flex-column gap-3">
+                                <a href="{{ route('chat.index') }}" 
+                                   class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-hover-light border border-gray-200 text-gray-800 text-hover-primary transition-all">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="symbol symbol-35px symbol-circle bg-light-success">
+                                            <i class="ki-outline ki-messages fs-4 text-success"></i>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold fs-6">Ruang Chat WhatsApp</span>
+                                            <span class="text-muted fs-8">Obrolan langsung dengan pelanggan</span>
+                                        </div>
+                                    </div>
+                                    <i class="ki-outline ki-arrow-right fs-5 text-gray-400"></i>
+                                </a>
+
+                                <a href="{{ route('admin.broadcasts.index') }}" 
+                                   class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-hover-light border border-gray-200 text-gray-800 text-hover-primary transition-all">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="symbol symbol-35px symbol-circle bg-light-primary">
+                                            <i class="ki-outline ki-send fs-4 text-primary"></i>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold fs-6">Broadcast Pesan</span>
+                                            <span class="text-muted fs-8">Kirim pesan massal ke kontak</span>
+                                        </div>
+                                    </div>
+                                    <i class="ki-outline ki-arrow-right fs-5 text-gray-400"></i>
+                                </a>
+
+                                <a href="{{ route('admin.reports.daily') }}" 
+                                   class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-hover-light border border-gray-200 text-gray-800 text-hover-primary transition-all">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="symbol symbol-35px symbol-circle bg-light-warning">
+                                            <i class="ki-outline ki-chart-line fs-4 text-warning"></i>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold fs-6">Laporan Harian CS</span>
+                                            <span class="text-muted fs-8">Performa respon dan missed chat</span>
+                                        </div>
+                                    </div>
+                                    <i class="ki-outline ki-arrow-right fs-5 text-gray-400"></i>
+                                </a>
+
+                                <a href="{{ route('admin.labels.index') }}" 
+                                   class="d-flex align-items-center justify-content-between p-3 rounded-3 bg-hover-light border border-gray-200 text-gray-800 text-hover-primary transition-all">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="symbol symbol-35px symbol-circle bg-light-info">
+                                            <i class="ki-outline ki-tag fs-4 text-info"></i>
+                                        </div>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-bold fs-6">Modul Label WhatsApp</span>
+                                            <span class="text-muted fs-8">Sinkronisasi label WhatsApp Business</span>
+                                        </div>
+                                    </div>
+                                    <i class="ki-outline ki-arrow-right fs-5 text-gray-400"></i>
+                                </a>
+                            </div>
+                            <!--end::Quick Links List-->
+                        </div>
+                    </div>
+                </div>
+                <!--end::Col-->
+            </div>
+            <!--end::Row-->
+
+            <!--begin::Row - Recent Contacts-->
+            <div class="row g-5 g-xl-8">
+                <div class="col-12">
+                    <div class="card card-flush border border-gray-200 shadow-sm">
+                        <div class="card-header pt-6 pb-2">
+                            <div class="card-title d-flex flex-column">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="ki-outline ki-people fs-3 text-gray-700"></i>
+                                    <h3 class="fw-bold text-gray-900 fs-5 mb-0">Kontak & Obrolan Terbaru</h3>
+                                </div>
+                                <span class="text-muted fs-7 mt-1">Daftar pelanggan dengan interaksi WhatsApp terkini</span>
+                            </div>
+                            <div class="card-toolbar">
+                                <a href="{{ route('admin.customers.index') }}" class="btn btn-sm btn-light-primary fw-semibold">
+                                    Lihat Semua Kontak
                                 </a>
                             </div>
                         </div>
-                        <div class="card-body pt-6">
-                            @if($recent_customers->isNotEmpty())
+                        <div class="card-body pt-2">
+                            @if ($recentCustomers->isNotEmpty())
                             <div class="table-responsive">
-                                <table class="table table-row-dashed align-middle gs-0 gy-4">
+                                <table class="table table-row-dashed align-middle gs-0 gy-3 my-0">
                                     <thead>
-                                        <tr class="fs-7 fw-bold text-gray-500 border-bottom-0">
-                                            <th>CUSTOMER</th>
-                                            <th>NOMOR WA</th>
-                                            <th>TERAKHIR CHAT</th>
-                                            <th></th>
+                                        <tr class="fs-7 fw-bold text-gray-500 border-bottom-1 border-gray-200">
+                                            <th class="min-w-200px">PELANGGAN</th>
+                                            <th class="min-w-140px">NOMOR WHATSAPP</th>
+                                            <th class="min-w-160px">LABEL WHATSAPP</th>
+                                            <th class="min-w-130px">TERAKHIR CHAT</th>
+                                            <th class="text-end min-w-80px">AKSI</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($recent_customers as $customer)
+                                        @foreach ($recentCustomers as $customer)
                                         <tr>
                                             <td>
                                                 <div class="d-flex align-items-center">
-                                                    <div class="symbol symbol-40px me-3">
-                                                        <div class="symbol-label fs-5 fw-semibold bg-light-primary text-primary">
+                                                    <div class="symbol symbol-35px symbol-circle me-3">
+                                                        <div class="symbol-label fs-6 fw-bold bg-light-primary text-primary">
                                                             {{ generate_initials($customer->name ?: $customer->wa_number) }}
                                                         </div>
                                                     </div>
                                                     <div class="d-flex flex-column">
-                                                        <span class="text-gray-800 fw-bold">
+                                                        <span class="text-gray-800 fw-bold fs-6">
                                                             {{ $customer->name ?: 'Tanpa Nama' }}
                                                         </span>
+                                                        @if ($customer->created_at && $customer->created_at->isToday())
+                                                        <span class="badge badge-light-success fs-9 w-fit mt-1">Lead Baru</span>
+                                                        @endif
                                                     </div>
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="text-gray-600 fw-semibold">
+                                                <span class="text-gray-700 fw-semibold fs-7 font-monospace">
                                                     {{ format_phone_display($customer->wa_number) }}
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="text-gray-600">
+                                                @if ($customer->labels->isNotEmpty())
+                                                    <div class="d-flex flex-wrap gap-1">
+                                                        @foreach ($customer->labels as $label)
+                                                        <span class="badge fs-8 py-1 px-2" style="background-color: {{ $label->color }}18; color: {{ $label->color }};">
+                                                            {{ $label->name }}
+                                                        </span>
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted fs-8">Tidak ada label</span>
+                                                @endif
+                                            </td>
+                                            <td>
+                                                <span class="text-gray-600 fs-7">
                                                     {{ time_ago($customer->last_chat_at) }}
                                                 </span>
                                             </td>
                                             <td class="text-end">
                                                 <a href="{{ url('chat?customer=' . $customer->id) }}" 
-                                                   class="btn btn-sm btn-icon btn-light-success">
+                                                   class="btn btn-sm btn-icon btn-light-success btn-active-success"
+                                                   title="Buka Obrolan">
                                                     <i class="ki-outline ki-message-text-2 fs-4"></i>
                                                 </a>
                                             </td>
@@ -197,8 +355,13 @@
                                 </table>
                             </div>
                             @else
-                            <div class="text-center text-muted py-10">
-                                Belum ada data customer
+                            <div class="d-flex flex-column align-items-center justify-content-center py-12">
+                                <i class="ki-outline ki-messages fs-3x text-muted mb-3"></i>
+                                <div class="fs-6 fw-bold text-gray-800 mb-1">Belum Ada Riwayat Obrolan</div>
+                                <div class="text-muted fs-7 mb-4">Kontak yang mengirim atau menerima pesan akan otomatis ditampilkan di sini.</div>
+                                <a href="{{ route('chat.index') }}" class="btn btn-sm btn-primary">
+                                    Mulai Chat Baru
+                                </a>
                             </div>
                             @endif
                         </div>
@@ -209,4 +372,123 @@
 
         </div>
     </div>
+
+    @push('js')
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var chartElement = document.getElementById('chart_daily_leads');
+            if (!chartElement || typeof ApexCharts === 'undefined') {
+                return;
+            }
+
+            var categories = @json($dailyDates);
+            var leadsData = @json($dailyLeads);
+
+            var options = {
+                series: [{
+                    name: 'Leads Masuk',
+                    data: leadsData
+                }],
+                chart: {
+                    fontFamily: 'inherit',
+                    type: 'bar',
+                    height: 310,
+                    toolbar: {
+                        show: false
+                    }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: false,
+                        columnWidth: '40%',
+                        borderRadius: 4
+                    }
+                },
+                dataLabels: {
+                    enabled: false
+                },
+                stroke: {
+                    show: true,
+                    width: 2,
+                    colors: ['transparent']
+                },
+                xaxis: {
+                    categories: categories,
+                    axisBorder: {
+                        show: false
+                    },
+                    axisTicks: {
+                        show: false
+                    },
+                    labels: {
+                        style: {
+                            colors: '#7E8299',
+                            fontSize: '12px'
+                        }
+                    }
+                },
+                yaxis: {
+                    min: 0,
+                    forceNiceScale: true,
+                    labels: {
+                        style: {
+                            colors: '#7E8299',
+                            fontSize: '12px'
+                        },
+                        formatter: function(val) {
+                            return Math.round(val);
+                        }
+                    }
+                },
+                fill: {
+                    opacity: 1
+                },
+                states: {
+                    normal: {
+                        filter: {
+                            type: 'none',
+                            value: 0
+                        }
+                    },
+                    hover: {
+                        filter: {
+                            type: 'none',
+                            value: 0
+                        }
+                    },
+                    active: {
+                        allowMultipleDataPointsSelection: false,
+                        filter: {
+                            type: 'none',
+                            value: 0
+                        }
+                    }
+                },
+                tooltip: {
+                    style: {
+                        fontSize: '12px'
+                    },
+                    y: {
+                        formatter: function(val) {
+                            return val + ' Lead Baru';
+                        }
+                    }
+                },
+                colors: ['#00A884'],
+                grid: {
+                    borderColor: '#EFF2F5',
+                    strokeDashArray: 4,
+                    yaxis: {
+                        lines: {
+                            show: true
+                        }
+                    }
+                }
+            };
+
+            var chart = new ApexCharts(chartElement, options);
+            chart.render();
+        });
+    </script>
+    @endpush
 </x-metronic-layout>
