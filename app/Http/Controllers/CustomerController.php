@@ -127,7 +127,7 @@ class CustomerController extends Controller
         $labels = Label::withCount('customers')->get();
 
         $sources = ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
 
@@ -157,7 +157,7 @@ class CustomerController extends Controller
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
         $sources = \App\Models\ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
         $customer = null;
@@ -228,7 +228,7 @@ class CustomerController extends Controller
         $users = User::whereIn('role', ['superadmin', 'admin', 'cs', 'sales'])->get();
         $companies = Company::all();
         $sources = \App\Models\ChatSourceRule::pluck('source_name')
-            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'])
+            ->concat(['TikTok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'])
             ->unique()
             ->values();
 
@@ -371,7 +371,7 @@ class CustomerController extends Controller
                 'id' => $customer->id,
                 'name' => $customer->name,
                 'whatsapp' => $customer->wa_number,
-                'source' => $customer->source ?: 'Unknown',
+                'source' => $customer->source ?: 'Direct Chat – Belum Ditanya',
                 'created_at' => $customer->created_at ? $customer->created_at->format('Y-m-d') : null,
             ];
         });
@@ -407,7 +407,7 @@ class CustomerController extends Controller
                 'name' => $customer->name,
                 'whatsapp' => $customer->wa_number,
                 'email' => $customer->email,
-                'source' => $customer->source ?: 'Unknown',
+                'source' => $customer->source ?: 'Direct Chat – Belum Ditanya',
                 'address' => $customer->address,
                 'notes' => $customer->notes,
                 'company' => $customer->company ? [
@@ -493,7 +493,7 @@ class CustomerController extends Controller
                 'wa_number' => $phone,
                 'name' => $request->name,
                 'email' => $request->email,
-                'source' => $request->source ?: 'Unknown',
+                'source' => $request->source ?: 'Direct Chat – Belum Ditanya',
                 'address' => $request->address,
                 'notes' => $request->notes,
                 'company_id' => $company_id,
@@ -685,7 +685,7 @@ class CustomerController extends Controller
                     'name' => $customer->name,
                     'whatsapp' => $customer->wa_number,
                     'email' => $customer->email,
-                    'source' => $customer->source ?: 'Unknown',
+                    'source' => $customer->source ?: 'Direct Chat – Belum Ditanya',
                     'address' => $customer->address,
                     'notes' => $customer->notes,
                     'company' => $customer->company ? [
@@ -739,7 +739,7 @@ class CustomerController extends Controller
 
         // Get defined sources from ChatSourceRule and default list
         $ruleSources = ChatSourceRule::pluck('source_name')->toArray();
-        $defaultSources = ['Tiktok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Unknown'];
+        $defaultSources = ['Tiktok', 'Instagram', 'Facebook Ads', 'Website', 'WhatsApp', 'Referral', 'Direct Chat – Belum Ditanya'];
 
         $sourceMap = [];
         foreach (array_merge(array_keys($customerCounts), $ruleSources, $defaultSources) as $s) {

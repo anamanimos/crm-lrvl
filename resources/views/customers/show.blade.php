@@ -75,12 +75,12 @@
 
                                 <div class="fw-bold mt-5 text-gray-600">Sumber / Asal (Source)</div>
                                 <div class="text-gray-800">
-                                    @if($customer->source && $customer->source !== 'Unknown')
+                                    @if($customer->source && !in_array($customer->source, ['Unknown', 'Direct Chat – Belum Ditanya', 'Direct Chat - Belum Ditanya']))
                                         <span class="badge badge-light-info fw-bold py-1 px-3">
                                             <i class="ki-outline ki-compass fs-8 me-1 text-info"></i>{{ $customer->source }}
                                         </span>
                                     @else
-                                        <span class="badge badge-light-secondary fw-semibold py-1 px-3">Unknown</span>
+                                        <span class="badge badge-light-secondary fw-semibold py-1 px-3">{{ $customer->source ?: 'Direct Chat – Belum Ditanya' }}</span>
                                     @endif
                                 </div>
 

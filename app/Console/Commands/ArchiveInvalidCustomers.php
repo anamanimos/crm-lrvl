@@ -53,7 +53,7 @@ class ArchiveInvalidCustomers extends Command
             $this->line("- Panjang Digit : " . strlen(trim($customer->wa_number)));
             $this->line("- Status Arsip  : " . ($customer->is_archived ? 'DIARSIPKAN (is_archived = 1)' : 'AKTIF (is_archived = 0)'));
             $this->line("- CS Ditugaskan : " . ($customer->assignedUser ? $customer->assignedUser->name : '-'));
-            $this->line("- Source        : " . ($customer->source ?: 'Unknown'));
+            $this->line("- Source        : " . ($customer->source ?: 'Direct Chat – Belum Ditanya'));
             $this->line("- Dibuat Pada   : " . ($customer->created_at ? $customer->created_at->format('Y-m-d H:i:s') : '-'));
 
             if (!$isDryRun && !$customer->is_archived) {
@@ -115,7 +115,7 @@ class ArchiveInvalidCustomers extends Command
                     $c->wa_number,
                     strlen(trim($c->wa_number)) . ' char',
                     $c->is_archived ? 'Sudah Arsip' : 'Aktif',
-                    $c->source ?: 'Unknown',
+                    $c->source ?: 'Direct Chat – Belum Ditanya',
                     $c->assignedUser ? $c->assignedUser->name : '-',
                     $c->created_at ? $c->created_at->format('Y-m-d H:i') : '-',
                 ];

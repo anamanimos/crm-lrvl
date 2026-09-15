@@ -158,20 +158,22 @@ class ChatSourceRuleController extends Controller
             abort(403, 'Akses Ditolak');
         }
 
-        // Update all existing customers whose source is null, empty, or 'WhatsApp' to 'Unknown'
+        // Update all existing customers whose source is null, empty, 'WhatsApp', or 'Unknown' to 'Direct Chat – Belum Ditanya'
         $updatedCount = \App\Models\Customer::whereNull('source')
             ->orWhere('source', '')
             ->orWhere('source', 'WhatsApp')
-            ->update(['source' => 'Unknown']);
+            ->orWhere('source', 'Unknown')
+            ->orWhere('source', 'unknown')
+            ->update(['source' => 'Direct Chat – Belum Ditanya']);
 
         if ($request->wantsJson() || $request->ajax()) {
             return response()->json([
                 'success' => true,
                 'updated_count' => $updatedCount,
-                'message' => "Berhasil memperbarui {$updatedCount} customer menjadi 'Unknown'."
+                'message' => "Berhasil memperbarui {$updatedCount} customer menjadi 'Direct Chat – Belum Ditanya'."
             ]);
         }
 
-        return back()->with('success', "Berhasil memperbarui {$updatedCount} customer menjadi 'Unknown'.");
+        return back()->with('success', "Berhasil memperbarui {$updatedCount} customer menjadi 'Direct Chat – Belum Ditanya'.");
     }
 }

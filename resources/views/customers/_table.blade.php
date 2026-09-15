@@ -119,13 +119,13 @@
                     </a>
                 </td>
                 <td class="col-source">
-                    @if ($customer->source && strtolower($customer->source) !== 'unknown')
+                    @if ($customer->source && !in_array(strtolower($customer->source), ['unknown', 'direct chat – belum ditanya', 'direct chat - belum ditanya']))
                         <span class="badge badge-light-primary fw-bold fs-7 py-1 px-3">
                             <i class="ki-outline ki-compass fs-6 me-1 text-primary"></i>{{ $customer->source }}
                         </span>
                     @else
-                        <span class="badge badge-light text-muted fw-semibold fs-7 py-1 px-3">
-                            {{ $customer->source ?: 'Unknown' }}
+                        <span class="badge badge-light-secondary text-gray-700 fw-semibold fs-7 py-1 px-3">
+                            {{ $customer->source ?: 'Direct Chat – Belum Ditanya' }}
                         </span>
                     @endif
                 </td>

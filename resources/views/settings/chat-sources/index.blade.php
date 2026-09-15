@@ -30,7 +30,7 @@
             <div class="d-flex align-items-center gap-2 gap-lg-3">
                 <button type="button" class="btn btn-sm fw-bold btn-light-warning" onclick="syncUnknownCustomers()" id="btn_sync_unknown">
                     <i class="ki-outline ki-arrows-circle fs-4 me-1"></i>
-                    Set Semua Customer Lama ke Unknown
+                    Set Semua Customer Lama ke Direct Chat
                 </button>
                 <button type="button" class="btn btn-sm fw-bold btn-primary" onclick="openAddModal()">
                     <i class="ki-outline ki-plus fs-4 me-1"></i>
@@ -468,8 +468,8 @@
 
         function syncUnknownCustomers() {
             Swal.fire({
-                title: 'Set Customer Lama ke Unknown?',
-                text: 'Semua customer yang saat ini belum memiliki sumber atau masih WhatsApp akan diubah menjadi Unknown.',
+                title: 'Set Customer Lama ke Direct Chat – Belum Ditanya?',
+                text: 'Semua customer yang saat ini belum memiliki sumber atau masih WhatsApp akan diubah menjadi Direct Chat – Belum Ditanya.',
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Update Sekarang',
